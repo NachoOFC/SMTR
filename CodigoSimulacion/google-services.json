@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1097049027759",
+    "firebase_url": "https://innovacionproyectos-e79cc-default-rtdb.firebaseio.com",
+    "project_id": "innovacionproyectos-e79cc",
+    "storage_bucket": "innovacionproyectos-e79cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097049027759:android:a3d2a9c212d7283945905a",
+        "android_client_info": {
+          "package_name": "com.solucionelectrica"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCT52-UBimFRn8kAbT2XOInMQWn8bIQgE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

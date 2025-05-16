@@ -46,7 +46,7 @@ export default {
 
       assets: [
         { 
-          id: 1, 
+          id: 10, 
           name: 'Batería UPS', 
           value: '90%', 
           valueClass: 'badge-green', 

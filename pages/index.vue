@@ -7,7 +7,7 @@
       <div class="filter-section">
         <h3>Activos según:</h3>
         <FilterChips :filters="filters" v-model="selectedFilter" />
-        <button v-if="selectedFilter" @click="clearFilter" class="clear-filter">Limpiar filtro como estamos </button>
+        <button v-if="selectedFilter" @click="clearFilter" class="clear-filter">Limpiar filtro </button>
       </div>
       <AssetList :assets="filteredAssets" />
     </div>

@@ -47,7 +47,7 @@ export default {
       assets: [
         { 
           id: 10, 
-          name: 'Batería UPS', 
+          name: 'Batería UPSoooooo', 
           value: '90%', 
           valueClass: 'badge-green', 
           sector: 'Los Muermos', 

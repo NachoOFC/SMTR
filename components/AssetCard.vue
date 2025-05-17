@@ -1,17 +1,30 @@
 <template>
   <div class="asset-card">
-    <div class="asset-header">
-      <span class="asset-title">{{ asset.name }}</span>
-      <span v-if="asset.value" class="asset-value" :class="asset.valueClass">{{ asset.value }}</span>
-    </div>
-    <div class="asset-sector">Sector: {{ asset.sector }}</div>
-    <div class="asset-status">
-      Estado: <StatusBadge :status="asset.status" />
-    </div>
-    <div class="asset-badges">
-      <StatusBadge status="Bueno" />
-      <StatusBadge status="Precaución" />
-      <StatusBadge status="Crítico" />
+    <div :class="['card h-100 shadow-sm', darkMode ? 'dark-mode' : '']">
+      <div class="card-body">
+        <div class="asset-header">
+          <h5 class="card-title mb-0">{{ asset.name }}</h5>
+          <span v-if="asset.value" class="badge asset-value" 
+                :class="{'bg-danger': asset.type === 'temp', 'bg-warning text-dark': asset.type === 'vib', 'bg-success': asset.type === 'electric'}">
+            {{ asset.value }}
+          </span>
+        </div>
+        
+        <div class="card-text mt-3">
+          <div class="asset-info-row">
+            <i class="bi bi-geo-alt-fill text-muted me-2"></i>
+            <span>Sector: <strong>{{ asset.sector }}</strong></span>
+          </div>
+          
+          <div class="asset-info-row mt-2">
+            <i class="bi bi-circle-fill status-icon me-2" 
+              :class="{'text-success': asset.status === 'Bueno', 
+                      'text-warning': asset.status === 'Precaución',
+                      'text-danger': asset.status === 'Crítico'}"></i>
+            <span>Estado: <StatusBadge :status="asset.status" /></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +41,10 @@ export default {
     asset: { 
       type: Object, 
       required: true 
+    },
+    darkMode: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -41,42 +58,65 @@ export default {
 
 <style scoped>
 .asset-card {
-  border: 2px solid #e0e0e0;
-  border-radius: 1.2rem;
-  padding: 1.2rem 1.5rem;
-  margin: 0.7rem;
-  min-width: 260px;
-  max-width: 320px;
-  background: #fff;
-  box-shadow: 0 2px 8px #0001;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  height: 100%; /* Para que todas las tarjetas tengan la misma altura */
 }
+
+.card {
+  border-radius: 0.75rem;
+  transition: transform 0.15s ease-in-out;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Dark mode */
+.dark-mode {
+  background-color: #272741;
+  color: #f0f0f0;
+  border-color: #3a3a55;
+}
+
+.dark-mode .text-muted {
+  color: #a0a0b0 !important;
+}
+
 .asset-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 1.2rem;
-  font-weight: bold;
+  align-items: flex-start;
 }
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-right: 10px;
+}
+
 .asset-value {
-  border-radius: 1rem;
-  padding: 0.2rem 1rem;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #fff;
+  white-space: nowrap;
+  font-size: 0.9rem;
 }
-.asset-value.temp { background: #ff5e5e; }
-.asset-value.vib { background: #ffe066; color: #222; }
-.asset-sector {
-  font-size: 1rem;
-  color: #333;
+
+.asset-info-row {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
 }
-.asset-status {
-  margin: 0.3rem 0;
+
+.status-icon {
+  font-size: 0.7rem;
 }
-.asset-badges {
-  margin-top: 0.5rem;
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 0.75rem;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
 }
 </style> 

@@ -1,6 +1,14 @@
 <template>
   <div class="asset-list">
-    <AssetCard v-for="asset in assets" :key="asset.id" :asset="asset" />
+    <div class="row g-3">
+      <div v-for="asset in assets" :key="asset.id" class="col-12 col-md-6 col-lg-4">
+        <AssetCard :asset="asset" :darkMode="darkMode" />
+      </div>
+      
+      <div v-if="assets.length === 0" class="col-12 text-center py-5">
+        <p :class="{'text-muted': !darkMode, 'text-secondary': darkMode}">No se encontraron activos</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -15,7 +23,12 @@ export default {
   props: {
     assets: { 
       type: Array, 
-      required: true 
+      required: true,
+      default: () => []
+    },
+    darkMode: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -29,9 +42,12 @@ export default {
 
 <style scoped>
 .asset-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
   margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .asset-list {
+    margin-top: 0.5rem;
+  }
 }
 </style> 

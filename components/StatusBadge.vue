@@ -1,5 +1,5 @@
 <template>
-  <span :class="['status-badge', statusClass]">{{ status }}</span>
+  <span class="badge" :class="statusClass">{{ status }}</span>
 </template>
 
 <script>
@@ -13,25 +13,22 @@ export default {
 
   computed: {
     statusClass() {
-      if (this.status === 'Bueno') return 'badge-green'
-      if (this.status === 'Precaución') return 'badge-yellow'
-      if (this.status === 'Crítico') return 'badge-red'
-      return ''
+      if (this.status === 'Bueno') return 'bg-success'
+      if (this.status === 'Precaución') return 'bg-warning text-dark'
+      if (this.status === 'Crítico') return 'bg-danger'
+      if (this.status === 'Informativo') return 'bg-info text-dark'
+      return 'bg-secondary'
     }
   }
 }
 </script>
 
 <style scoped>
-.status-badge {
-  border-radius: 1rem;
-  padding: 0.2rem 1rem;
-  font-size: 1rem;
-  font-weight: bold;
-  margin-right: 0.5rem;
-  display: inline-block;
+.badge {
+  padding: 0.35em 0.65em;
+  font-size: 0.85em;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  text-transform: none;
 }
-.badge-green { background: #6fdc6f; color: #222; }
-.badge-yellow { background: #ffe066; color: #222; }
-.badge-red { background: #ff5e5e; color: #fff; }
 </style> 

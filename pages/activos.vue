@@ -8,12 +8,18 @@
         
         <div class="actions-bar">
           <div class="search-container">
-            <input type="text" placeholder="Buscar activo..." class="search-input" />
-            <button class="search-button">🔍</button>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Buscar activo..." 
+              class="search-input"
+              @input="handleSearch"
+            />
+            <button class="search-button" @click="handleSearch">🔍</button>
           </div>
           
           <div class="filters">
-            <select class="filter-select">
+            <select class="filter-select" v-model="selectedType">
               <option value="">Todos los tipos</option>
               <option value="electric">Eléctricos</option>
               <option value="temp">Temperatura</option>
@@ -21,14 +27,14 @@
               <option value="security">Seguridad</option>
             </select>
             
-            <select class="filter-select">
+            <select class="filter-select" v-model="selectedLocation">
               <option value="">Todas las ubicaciones</option>
               <option value="puerto-varas">Puerto Varas</option>
               <option value="osorno">Osorno</option>
               <option value="los-muermos">Los Muermos</option>
             </select>
             
-            <select class="filter-select">
+            <select class="filter-select" v-model="selectedStatus">
               <option value="">Todos los estados</option>
               <option value="bueno">Bueno</option>
               <option value="precaucion">Precaución</option>
@@ -42,196 +48,31 @@
         </div>
         
         <div class="assets-grid">
-          <div class="asset-card">
+          <div v-for="asset in filteredAssets" :key="asset.id" class="asset-card">
             <div class="asset-header">
-              <span class="asset-title">Batería UPS</span>
-              <span class="asset-badge green">90%</span>
+              <span class="asset-title">{{ asset.name }}</span>
+              <span :class="['asset-badge', asset.valueClass]">{{ asset.value }}</span>
             </div>
             <div class="asset-details">
               <div class="detail-item">
                 <span class="detail-label">ID:</span>
-                <span>BAT-001</span>
+                <span>{{ asset.id }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Sector:</span>
-                <span>Los Muermos</span>
+                <span>{{ asset.sector }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Tipo:</span>
-                <span>Eléctrico</span>
+                <span>{{ asset.type }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Estado:</span>
-                <span class="status good">Bueno</span>
+                <span :class="['status', asset.status.toLowerCase()]">{{ asset.status }}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Última revisión:</span>
-                <span>12/07/2023</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-          
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">Tablero de Distribución</span>
-              <span class="asset-badge red">70°C</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>TAB-002</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>Puerto Varas</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>Temperatura</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span class="status critical">Crítico</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>15/07/2023</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-          
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">Motor Portón Eléctrico</span>
-              <span class="asset-badge yellow">2.9g</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>MOT-003</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>Osorno</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>Vibración</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span class="status warning">Precaución</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>10/07/2023</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-          
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">Sensor Puerta Principal</span>
-              <span class="asset-badge green">Activo</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>SENS-004</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>Los Muermos</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>Seguridad</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span class="status good">Bueno</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>14/07/2023</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-          
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">Panel Solar</span>
-              <span class="asset-badge green">88%</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>PAN-005</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>Puerto Varas</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>Eléctrico</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span class="status good">Bueno</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>13/07/2023</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-          
-          <div class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">Sensor de Humedad</span>
-              <span class="asset-badge blue">45%</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>HUM-006</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>Osorno</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>Ambiental</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span class="status good">Bueno</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>08/07/2023</span>
+                <span>{{ asset.lastReview }}</span>
               </div>
             </div>
             <div class="asset-actions">
@@ -267,7 +108,65 @@ export default {
 
   data() {
     return {
-      darkMode: false
+      darkMode: false,
+      searchQuery: '',
+      selectedType: '',
+      selectedLocation: '',
+      selectedStatus: '',
+      assets: [
+        {
+          id: 'BAT-001',
+          name: 'Batería UPS',
+          value: '90%',
+          valueClass: 'green',
+          sector: 'Los Muermos',
+          type: 'Eléctrico',
+          status: 'Bueno',
+          lastReview: '12/07/2023'
+        },
+        {
+          id: 'SENS-004',
+          name: 'Sensor Puerta Principal',
+          value: 'Activo',
+          valueClass: 'green',
+          sector: 'Los Muermos',
+          type: 'Seguridad',
+          status: 'Bueno',
+          lastReview: '14/07/2023'
+        },
+        {
+          id: 'HUM-006',
+          name: 'Sensor de Humedad',
+          value: '45%',
+          valueClass: 'blue',
+          sector: 'Osorno',
+          type: 'Ambiental',
+          status: 'Bueno',
+          lastReview: '08/07/2023'
+        }
+      ]
+    }
+  },
+
+  computed: {
+    filteredAssets() {
+      return this.assets.filter(asset => {
+        const matchesSearch = this.searchQuery === '' || 
+          asset.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          asset.id.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          asset.sector.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+        const matchesType = this.selectedType === '' || 
+          asset.type.toLowerCase() === this.selectedType.toLowerCase();
+
+        const matchesLocation = this.selectedLocation === '' || 
+          asset.sector.toLowerCase() === this.selectedLocation.toLowerCase();
+
+        const matchesStatus = this.selectedStatus === '' || 
+          asset.status.toLowerCase() === this.selectedStatus.toLowerCase();
+
+        return matchesSearch && matchesType && matchesLocation && matchesStatus;
+      });
     }
   },
 
@@ -291,6 +190,10 @@ export default {
   },
   
   methods: {
+    handleSearch() {
+      // La búsqueda se maneja automáticamente a través del computed property filteredAssets
+    },
+    
     toggleTheme() {
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);

@@ -3,7 +3,9 @@
     <!-- Sidebar para pantallas medianas y grandes -->
     <aside class="sidebar d-none d-md-flex">
       <div class="logo-section">
-        <span class="logo-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+        <span class="logo-icon"
+          ><i class="bi bi-lightning-charge-fill"></i
+        ></span>
         <span class="logo-text">SMTR</span>
       </div>
       <nav class="menu">
@@ -44,30 +46,60 @@
     <nav class="navbar navbar-dark bg-primary fixed-bottom d-md-none">
       <div class="container-fluid">
         <div class="navbar-mobile-menu">
-          <NuxtLink to="/principal" class="navbar-mobile-item" active-class="active">
+          <NuxtLink
+            to="/principal"
+            class="navbar-mobile-item"
+            active-class="active"
+          >
             <i class="bi bi-house-door-fill"></i>
             <span>Principal</span>
           </NuxtLink>
-          <NuxtLink to="/alertas" class="navbar-mobile-item" active-class="active">
+          <NuxtLink
+            to="/alertas"
+            class="navbar-mobile-item"
+            active-class="active"
+          >
             <i class="bi bi-bell-fill"></i>
             <span>Alertas</span>
           </NuxtLink>
-          <NuxtLink to="/historial" class="navbar-mobile-item" active-class="active">
+          <NuxtLink
+            to="/historial"
+            class="navbar-mobile-item"
+            active-class="active"
+          >
             <i class="bi bi-clipboard-data-fill"></i>
             <span>Historial</span>
           </NuxtLink>
-          <NuxtLink to="/activos" class="navbar-mobile-item" active-class="active">
+          <NuxtLink
+            to="/activos"
+            class="navbar-mobile-item"
+            active-class="active"
+          >
             <i class="bi bi-hdd-rack-fill"></i>
             <span>Activos</span>
           </NuxtLink>
           <div class="dropdown dropup">
-            <button class="navbar-mobile-item dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button
+              class="navbar-mobile-item dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
               <i class="bi bi-three-dots"></i>
               <span>Más</span>
             </button>
             <ul class="dropdown-menu">
-              <li><NuxtLink to="/ayuda" class="dropdown-item"><i class="bi bi-question-circle-fill me-2"></i> Ayuda</NuxtLink></li>
-              <li><a class="dropdown-item" href="#" @click.prevent="logout"><i class="bi bi-box-arrow-left me-2"></i> Log Out</a></li>
+              <li>
+                <NuxtLink to="/ayuda" class="dropdown-item"
+                  ><i class="bi bi-question-circle-fill me-2"></i>
+                  Ayuda</NuxtLink
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="logout"
+                  ><i class="bi bi-box-arrow-left me-2"></i> Log Out</a
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -77,32 +109,37 @@
 </template>
 
 <script>
+import { getAuth, signOut } from "firebase/auth";
+
 export default {
   data() {
     return {
-      userName: ''
-    }
+      userName: "",
+    };
   },
-  
+
   mounted() {
     // Obtener el nombre de usuario al cargar el componente
     try {
-      this.userName = localStorage.getItem('user') || 'Usuario';
+      this.userName = localStorage.getItem("user") || "Usuario";
     } catch (e) {
-      console.error('Error al obtener el nombre de usuario:', e);
+      console.error("Error al obtener el nombre de usuario:", e);
     }
   },
 
   methods: {
     logout() {
-      // Cerrar sesión (solo eliminar la autenticación, mantener los datos de perfil)
-      localStorage.removeItem('isAuthenticated');
-      
-      // Navegar directamente al login sin usar el router
-      window.location.href = '/login';
-    }
-  }
-}
+      const auth = getAuth();
+      signOut(auth)
+        .then(() => {
+          window.location.href = "/login";
+        })
+        .catch((error) => {
+          // An error happened.
+        });
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -154,15 +191,17 @@ export default {
   transition: background 0.2s;
 }
 
-.menu-link:hover, .menu-link.active {
-  background: rgba(255,255,255,0.2);
+.menu-link:hover,
+.menu-link.active {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-bottom {
   margin-top: 2rem;
 }
 
-.help, .logout {
+.help,
+.logout {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -196,7 +235,7 @@ export default {
 }
 
 .navbar-mobile-item.active {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .dropdown-menu {
@@ -208,9 +247,9 @@ export default {
   .navbar-mobile-item span {
     font-size: 0.7rem;
   }
-  
+
   .navbar-mobile-item i {
     font-size: 1.1rem;
   }
 }
-</style> 
+</style>

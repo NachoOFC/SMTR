@@ -1,308 +1,363 @@
 <template>
-  <div :class="['login-page', isDarkMode ? 'dark-mode' : '']">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-          <div class="login-card mt-5">
-            <div class="card shadow-lg">
-              <div class="card-body p-4 p-md-5">
-                <div class="text-center mb-4">
-                  <h2 class="login-title">SMTR</h2>
-                  <p class="login-subtitle">Sistema de Monitoreo en Tiempo Real</p>
-                  <div class="logo-container">
-                    <div class="logo-circle">
-                      <i class="bi bi-lightning-charge-fill"></i>
-                    </div>
-                  </div>
-                </div>
-                
-                <form @submit.prevent="onLogin">
-                  <div class="mb-4">
-                    <label for="username" class="form-label">Usuario</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                      <input 
-                        type="text" 
-                        id="username" 
-                        v-model="username" 
-                        class="form-control" 
-                        placeholder="Ingrese su usuario" 
-                        required 
-                      />
-                    </div>
-                    <small v-if="showError" class="text-danger">Usuario o contraseña incorrectos</small>
-                  </div>
-                  
-                  <div class="mb-4">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <div class="input-group">
-                      <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
-                      <input 
-                        type="password" 
-                        id="password" 
-                        v-model="password" 
-                        class="form-control" 
-                        placeholder="Ingrese su contraseña" 
-                        required 
-                      />
-                    </div>
-                  </div>
-                  
-                  <button type="submit" class="btn btn-primary w-100 py-2 mt-3" :disabled="isLoading">
-                    <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    {{ isLoading ? 'Ingresando...' : 'Ingresar' }}
-                  </button>
-                </form>
-                
-                <div class="mt-4 text-center">
-                  <button 
-                    class="btn btn-sm btn-outline-secondary theme-toggle"
-                    @click="toggleTheme"
-                  >
-                    <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
-                    {{ isDarkMode ? 'Modo claro' : 'Modo oscuro' }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="login-container" :class="{ 'dark-mode': isDarkMode }">
+    <div class="login-box">
+      <div class="logo-container">
+        <i class="bi bi-lightning-charge-fill"></i>
       </div>
+      <h2>SMTR</h2>
+      <p class="subtitle">Sistema de Monitoreo en Tiempo Real</p>
+      <form @submit.prevent="handleLogin">
+        <div class="form-group">
+          <label for="email">
+            <i class="bi bi-envelope-fill"></i>
+            Correo Electrónico
+          </label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            required
+            placeholder="Ingrese su correo electrónico"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">
+            <i class="bi bi-key-fill"></i>
+            Contraseña
+          </label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            required
+            placeholder="Ingrese su contraseña"
+          />
+        </div>
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+        <button type="submit" class="login-btn" :disabled="isLoading">
+          <span v-if="isLoading" class="spinner"></span>
+          {{ isLoading ? "Ingresando..." : "Iniciar Sesión" }}
+        </button>
+      </form>
     </div>
+    <button class="theme-toggle" @click="toggleTheme">
+      <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+    </button>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      isLoading: false,
-      showError: false,
-      isDarkMode: true
-    }
-  },
+<script setup>
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth"; // Import signInWithEmailAndPassword
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-  mounted() {
-    // Al cargar el componente de login, asegurarse de que no haya sesión activa
-    localStorage.removeItem('isAuthenticated');
-    
-    // Preservar datos de perfil si existen, o crearlos con valores por defecto si no
-    if (!localStorage.getItem('userAvatar')) {
-      localStorage.setItem('userAvatar', JSON.stringify({
-        type: 'icon', 
-        value: 'bi-person-circle', 
-        icon: 'bi bi-person-circle'
-      }));
-    }
-    
-    // Usar el nombre de usuario anterior si existe
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      this.username = savedUser;
-    }
-    
-    // Cargar modo oscuro como predeterminado o según localStorage
-    try {
-      if (localStorage.getItem('darkMode') === null) {
-        localStorage.setItem('darkMode', 'true');
-      }
-      this.isDarkMode = localStorage.getItem('darkMode') === 'true';
-    } catch (e) {
-      console.error('Error cargando preferencia de tema:', e);
-    }
-  },
+const router = useRouter();
+const email = ref("");
+const password = ref("");
+const errorMessage = ref("");
+const isLoading = ref(false);
+const isDarkMode = ref(false);
+const auth = getAuth();
 
-  methods: {
-    onLogin() {
-      this.isLoading = true;
-      this.showError = false;
-      
-      // Simulamos una llamada al backend
-      setTimeout(() => {
-        // Verificamos las credenciales (esto sería reemplazado por una API real)
-        // Permitimos cualquier usuario/contraseña (mayúsculas o minúsculas)
-        if (this.username.trim() && this.password.trim()) {
-          // Autenticación exitosa
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('user', this.username);
-          
-          // Establecer datos de perfil si no existen
-          if (!localStorage.getItem('userRole')) {
-            localStorage.setItem('userRole', 'Técnico');
-          }
-          
-          if (!localStorage.getItem('userDepartment')) {
-            localStorage.setItem('userDepartment', 'Sistemas Eléctricos');
-          }
-          
-          // Generar un correo electrónico de ejemplo si no existe
-          if (!localStorage.getItem('userEmail')) {
-            const emailDomain = 'smtr.ejemplo.com';
-            const username = this.username.toLowerCase().replace(/\s+/g, '.');
-            localStorage.setItem('userEmail', `${username}@${emailDomain}`);
-          }
-          
-          // Redirigimos a la página principal usando window.location para refrescar completamente
-          window.location.href = '/principal';
-        } else {
-          // Autenticación fallida
-          this.showError = true;
-          this.isLoading = false;
-        }
-      }, 1000);
-    },
-    
-    toggleTheme() {
-      this.isDarkMode = !this.isDarkMode;
-      
-      // Guardar la preferencia en localStorage
-      if (process.client) {
-        localStorage.setItem('darkMode', this.isDarkMode);
-      }
+const handleLogin = async () => {
+  try {
+    isLoading.value = true;
+    errorMessage.value = "";
+
+    const auth = getAuth();
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    const user = userCredential.user;
+
+    // Guardar información del usuario en localStorage
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+      })
+    );
+
+    // Establecer isAuthenticated en localStorage
+    localStorage.setItem("isAuthenticated", "true");
+
+    // Redirigir al dashboard
+    router.push("/principal");
+  } catch (error) {
+    console.error("Error de autenticación:", error);
+    switch (error.code) {
+      case "auth/invalid-email":
+        errorMessage.value = "El correo electrónico no es válido";
+        break;
+      case "auth/user-disabled":
+        errorMessage.value = "Esta cuenta ha sido deshabilitada";
+        break;
+      case "auth/user-not-found":
+        errorMessage.value = "No existe una cuenta con este correo electrónico";
+        break;
+      case "auth/wrong-password":
+        errorMessage.value = "Contraseña incorrecta";
+        break;
+      default:
+        errorMessage.value =
+          "Error al iniciar sesión. Por favor, intente nuevamente";
     }
+  } finally {
+    isLoading.value = false;
   }
-}
+};
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Si el usuario ya está autenticado (por ejemplo, al recargar la página),
+    // asegúrate de que isAuthenticated esté en localStorage y redirige.
+    localStorage.setItem("isAuthenticated", "true");
+    router.push("/principal");
+  } else {
+    // Si no hay usuario autenticado, asegúrate de que isAuthenticated no esté en localStorage
+    localStorage.removeItem("isAuthenticated");
+    console.log("usuario deslogeado");
+  }
+});
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  document.body.classList.toggle("dark-mode");
+  // También guarda la preferencia de tema en localStorage
+  localStorage.setItem("darkMode", isDarkMode.value);
+};
 </script>
 
 <style scoped>
-.login-page {
+.login-container {
   min-height: 100vh;
   display: flex;
+  justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #1e4d92, #2c3e50);
-  background-size: cover;
+  position: relative;
 }
 
-.login-page.dark-mode {
-  background: linear-gradient(135deg, #121224, #1a1a2e);
-}
-
-.login-title {
-  color: #1e4d92;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.login-subtitle {
-  color: #6c757d;
-  font-size: 0.9rem;
+.login-box {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  backdrop-filter: blur(10px);
 }
 
 .logo-container {
-  margin: 20px 0;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-.logo-circle {
-  width: 80px;
-  height: 80px;
-  background: #f8f9fa;
+.logo-container i {
+  font-size: 3rem;
+  color: #1e4d92;
+  background: #f0f4f8;
+  padding: 1rem;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(30, 77, 146, 0.2);
+}
+
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: #1e4d92;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+  font-weight: 500;
+}
+
+.form-group label i {
+  color: #1e4d92;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #1e4d92;
+  box-shadow: 0 0 0 3px rgba(30, 77, 146, 0.1);
+  outline: none;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 0.875rem;
+  background: #1e4d92;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-btn:hover {
+  background: #163a6f;
+  transform: translateY(-1px);
+}
+
+.login-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ffffff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 1rem;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 6px;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
-  border: 2px solid #1e4d92;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
 }
 
-.logo-circle i {
-  font-size: 2.5rem;
-  color: #1e4d92;
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
 }
 
-.card {
-  border-radius: 10px;
-  border: none;
+/* Dark mode styles */
+.dark-mode {
+  background: linear-gradient(135deg, #121224, #1a1a2e);
 }
 
-.input-group-text {
-  background-color: #f8f9fa;
+.dark-mode .login-box {
+  background: rgba(45, 45, 45, 0.95);
 }
 
-.btn-primary {
-  background-color: #1e4d92;
-  border-color: #1e4d92;
+.dark-mode .logo-container i {
+  color: #4d92e0;
+  background: #1a1a2e;
 }
 
-.btn-primary:hover {
-  background-color: #163a6f;
-  border-color: #163a6f;
-}
-
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-}
-
-.theme-toggle i {
-  font-size: 1.1rem;
-}
-
-/* Dark mode styling */
-.dark-mode .card {
-  background-color: #272741;
-  color: #f0f0f0;
-}
-
-.dark-mode .login-title {
+.dark-mode .login-box h2 {
   color: #4d92e0;
 }
 
-.dark-mode .login-subtitle {
+.dark-mode .subtitle {
   color: #a0a0b0;
 }
 
-.dark-mode .logo-circle {
-  background: #1a1a2e;
-  border-color: #4d92e0;
+.dark-mode .form-group label {
+  color: #e0e0e0;
 }
 
-.dark-mode .logo-circle i {
+.dark-mode .form-group label i {
   color: #4d92e0;
 }
 
-.dark-mode .input-group-text {
-  background-color: #1a1a2e;
-  color: #f0f0f0;
+.dark-mode .form-group input {
+  background: #2d2d2d;
   border-color: #3a3a55;
+  color: #fff;
 }
 
-.dark-mode .form-control {
-  background-color: #1a1a2e;
-  border-color: #3a3a55;
-  color: #f0f0f0;
+.dark-mode .form-group input:focus {
+  border-color: #4d92e0;
+  box-shadow: 0 0 0 3px rgba(77, 146, 224, 0.1);
 }
 
-.dark-mode .form-control:focus {
-  background-color: #1a1a2e;
-  color: #f0f0f0;
+.dark-mode .login-btn {
+  background: #4d92e0;
 }
 
-.dark-mode .form-label {
-  color: #f0f0f0;
+.dark-mode .login-btn:hover {
+  background: #3a7bc8;
 }
 
-.dark-mode .btn-outline-secondary {
-  color: #f0f0f0;
-  border-color: #3a3a55;
+.dark-mode .error-message {
+  background: rgba(220, 53, 69, 0.2);
 }
 
-.dark-mode .btn-outline-secondary:hover {
-  background-color: #3a3a55;
-  color: #f0f0f0;
-}
-
-@media (max-width: 768px) {
-  .login-card {
-    padding: 0 15px;
-  }
-  
-  .card-body {
+@media (max-width: 480px) {
+  .login-box {
+    margin: 1rem;
     padding: 1.5rem;
   }
+
+  .theme-toggle {
+    top: 1rem;
+    right: 1rem;
+  }
 }
-</style> 
+</style>

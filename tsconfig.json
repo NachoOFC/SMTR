@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+     "types": [
+      "@nuxt/types",
+      "@types/node"
+    ],
+    "moduleResolution": "node",
+    "target": "ESNext",
     "module": "ESNext", // Aquí está la corrección
     "strict": true,
     "esModuleInterop": true,

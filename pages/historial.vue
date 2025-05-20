@@ -93,16 +93,6 @@
                 </tr>
               </tbody>
             </table>
-            
-            <div class="pagination">
-              <button class="page-btn">&lt;</button>
-              <button class="page-btn active">1</button>
-              <button class="page-btn">2</button>
-              <button class="page-btn">3</button>
-              <span>...</span>
-              <button class="page-btn">8</button>
-              <button class="page-btn">&gt;</button>
-            </div>
           </div>
         </div>
       </div>
@@ -301,29 +291,11 @@ td {
 }
 
 .pagination {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  align-items: center;
+  display: none;
 }
 
 .page-btn {
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-.page-btn.active {
-  background: #1e4d92;
-  color: white;
-  border-color: #1e4d92;
+  display: none;
 }
 
 /* Estilos para modo oscuro */

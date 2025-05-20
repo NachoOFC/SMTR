@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container" :class="{ 'dark-mode': isDarkMode }">
+  <div v-if="isClient" class="login-container" :class="{ 'dark-mode': isDarkMode }">
     <div class="login-box">
       <div class="logo-container">
         <i class="bi bi-lightning-charge-fill"></i>
@@ -46,54 +46,67 @@
       <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
     </button>
   </div>
+  <div v-else class="login-loader">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Cargando...</p>
+  </div>
 </template>
 
 <script setup>
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-} from "firebase/auth"; // Import signInWithEmailAndPassword
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
+const isClient = ref(false);
 const router = useRouter();
 const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
 const isLoading = ref(false);
 const isDarkMode = ref(false);
-const auth = getAuth();
+
+let auth = null;
+let signInWithEmailAndPassword = null;
+let onAuthStateChanged = null;
+
+onMounted(async () => {
+  isClient.value = true;
+  if (typeof window !== "undefined") {
+    const firebaseAuth = await import("firebase/auth");
+    auth = firebaseAuth.getAuth();
+    signInWithEmailAndPassword = firebaseAuth.signInWithEmailAndPassword;
+    onAuthStateChanged = firebaseAuth.onAuthStateChanged;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push("/principal");
+      } else {
+        localStorage.removeItem("isAuthenticated");
+      }
+    });
+
+    isDarkMode.value = localStorage.getItem("darkMode") === "true";
+    if (isDarkMode.value) document.body.classList.add("dark-mode");
+  }
+});
 
 const handleLogin = async () => {
+  if (!auth || !signInWithEmailAndPassword) return;
+  isLoading.value = true;
+  errorMessage.value = "";
   try {
-    isLoading.value = true;
-    errorMessage.value = "";
-
-    const auth = getAuth();
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email.value,
       password.value
     );
     const user = userCredential.user;
-
-    // Guardar información del usuario en localStorage
     localStorage.setItem(
       "user",
-      JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-      })
+      JSON.stringify({ uid: user.uid, email: user.email })
     );
-
-    // Establecer isAuthenticated en localStorage
     localStorage.setItem("isAuthenticated", "true");
-
-    // Redirigir al dashboard
     router.push("/principal");
   } catch (error) {
-    console.error("Error de autenticación:", error);
     switch (error.code) {
       case "auth/invalid-email":
         errorMessage.value = "El correo electrónico no es válido";
@@ -116,23 +129,9 @@ const handleLogin = async () => {
   }
 };
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // Si el usuario ya está autenticado (por ejemplo, al recargar la página),
-    // asegúrate de que isAuthenticated esté en localStorage y redirige.
-    localStorage.setItem("isAuthenticated", "true");
-    router.push("/principal");
-  } else {
-    // Si no hay usuario autenticado, asegúrate de que isAuthenticated no esté en localStorage
-    localStorage.removeItem("isAuthenticated");
-    console.log("usuario deslogeado");
-  }
-});
-
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value;
   document.body.classList.toggle("dark-mode");
-  // También guarda la preferencia de tema en localStorage
   localStorage.setItem("darkMode", isDarkMode.value);
 };
 </script>

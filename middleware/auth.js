@@ -8,7 +8,6 @@ export default defineNuxtRouteMiddleware((to, from) => {
   // Siempre verificar si hay autenticación, excepto en la página de login
   if (to.path !== '/login') {
     try {
-      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
       
       // Si no está autenticado, redirigir a login
       if (!isAuthenticated) {
@@ -25,8 +24,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     return;
   } else if (to.path === '/login') {
     try {
-      // Si va a login pero ya está autenticado, redirigir a home
-      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+      
       
       if (isAuthenticated) {
         return navigateTo('/', { replace: true })

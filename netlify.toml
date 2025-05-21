@@ -1,0 +1,11 @@
+# netlify.toml - Coloca este archivo en la raíz de tu proyecto
+
+[build]
+  publish = "dist" # O el directorio que genera tu build
+  command = "npm run build" # O el comando que usas para construir
+
+# Esta es la parte más importante para SPAs en Netlify
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

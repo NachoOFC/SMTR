@@ -1,9 +1,5 @@
 <template>
-  <div v-if="isLoading" class="loading-screen">
-    <div class="spinner"></div>
-    <p>Cargando...</p>
-  </div>
-  <div v-else :class="['dashboard', darkMode ? 'dark-mode' : '']">
+  <div :class="['dashboard', darkMode ? 'dark-mode' : '']">
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
@@ -36,157 +32,159 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onBeforeMount } from 'vue'
+<script>
+import Sidebar from '~/components/Sidebar.vue'
+import Topbar from '~/components/Topbar.vue'
+import AlertList from '~/components/AlertList.vue'
+import FilterChips from '~/components/FilterChips.vue'
+import AssetList from '~/components/AssetList.vue'
 
-// Importar componentes (ajusta según tu estructura)
-const Sidebar = defineAsyncComponent(() => import('~/components/Sidebar.vue'))
-const Topbar = defineAsyncComponent(() => import('~/components/Topbar.vue'))
-const AlertList = defineAsyncComponent(() => import('~/components/AlertList.vue'))
-const FilterChips = defineAsyncComponent(() => import('~/components/FilterChips.vue'))
-const AssetList = defineAsyncComponent(() => import('~/components/AssetList.vue'))
-
-// Estado reactivo
-const darkMode = ref(false)
-const isLoading = ref(true)
-const selectedFilter = ref(null)
-
-// Datos
-const alerts = ref([
-  { id: 1, level: 'Crítico', levelText: 'Crítico', text: 'Temperatura Elevada (72°C) - Tablero Principal' },
-  { id: 2, level: 'Precaución', levelText: 'Precaución', text: 'Temperatura Elevada (60°C) - Tablero Principal' }
-])
-
-const filters = ref([
-  { label: 'Lugar', value: 'lugar' },
-  { label: 'T°', value: 'temp' },
-  { label: 'Electric.', value: 'electric' },
-  { label: 'Vibracion', value: 'vib' }
-])
-
-const assets = ref([
-  { 
-    id: 10, 
-    name: 'Batería Leandro', 
-    value: '90%', 
-    valueClass: 'badge-green', 
-    sector: 'Los Muermos', 
-    status: 'Bueno',
-    type: 'electric'
+export default {
+  components: {
+    Sidebar,
+    Topbar,
+    AlertList,
+    FilterChips,
+    AssetList
   },
-  { 
-    id: 2, 
-    name: 'Tablero de Distribución', 
-    value: '70°C', 
-    valueClass: 'asset-value temp', 
-    sector: 'Puerto Varas', 
-    status: 'Crítico',
-    type: 'temp'
-  },
-  { 
-    id: 3, 
-    name: 'Motor Portón Elec.', 
-    value: '2,9g', 
-    valueClass: 'asset-value vib', 
-    sector: 'Osorno', 
-    status: 'Precaución',
-    type: 'vib'
-  },
-  { 
-    id: 4, 
-    name: 'Sensor Puerta Principal', 
-    value: 'Activo', 
-    valueClass: 'badge-green', 
-    sector: 'Los Muermos', 
-    status: 'Bueno',
-    type: 'electric'
-  },
-  { 
-    id: 5, 
-    name: 'Panel Solar', 
-    value: '88%', 
-    valueClass: 'badge-green', 
-    sector: 'Puerto Varas', 
-    status: 'Bueno',
-    type: 'electric'
-  }
-])
 
-// Computed
-const filteredAssets = computed(() => {
-  if (!selectedFilter.value) {
-    return assets.value
-  }
-  
-  // Filtrar por tipo de activo
-  if (selectedFilter.value === 'temp' || 
-      selectedFilter.value === 'electric' || 
-      selectedFilter.value === 'vib') {
-    return assets.value.filter(asset => asset.type === selectedFilter.value)
-  }
-  
-  // Filtrar por lugar (sector)
-  if (selectedFilter.value === 'lugar') {
-    // Agrupar por sector único para este ejemplo
-    const uniqueSectors = [...new Set(assets.value.map(a => a.sector))]
-    return uniqueSectors.map(sector => {
-      const assetsInSector = assets.value.filter(a => a.sector === sector)
-      return {
-        id: `sector-${sector}`,
-        name: `Sector: ${sector}`,
-        value: `${assetsInSector.length} dispositivos`,
-        valueClass: 'badge-info',
-        sector: sector,
-        status: 'Informativo',
-        type: 'lugar'
+  data() {
+    return {
+      darkMode: false,
+      alerts: [
+        { id: 1, level: 'Crítico', levelText: 'Crítico', text: 'Temperatura Elevada (72°C) - Tablero Principal' },
+        { id: 2, level: 'Precaución', levelText: 'Precaución', text: 'Temperatura Elevada (60°C) - Tablero Principal' }
+      ],
+
+      filters: [
+        { label: 'Lugar', value: 'lugar' },
+        { label: 'T°', value: 'temp' },
+        { label: 'Electric.', value: 'electric' },
+        { label: 'Vibracion', value: 'vib' }
+      ],
+
+      assets: [
+        { 
+          id: 10, 
+          name: 'Batería Leandro', 
+          value: '90%', 
+          valueClass: 'badge-green', 
+          sector: 'Los Muermos', 
+          status: 'Bueno',
+          type: 'electric'
+        },
+        { 
+          id: 2, 
+          name: 'Tablero de Distribución', 
+          value: '70°C', 
+          valueClass: 'asset-value temp', 
+          sector: 'Puerto Varas', 
+          status: 'Crítico',
+          type: 'temp'
+        },
+        { 
+          id: 3, 
+          name: 'Motor Portón Elec.', 
+          value: '2,9g', 
+          valueClass: 'asset-value vib', 
+          sector: 'Osorno', 
+          status: 'Precaución',
+          type: 'vib'
+        },
+        { 
+          id: 4, 
+          name: 'Sensor Puerta Principal', 
+          value: 'Activo', 
+          valueClass: 'badge-green', 
+          sector: 'Los Muermos', 
+          status: 'Bueno',
+          type: 'electric'
+        },
+        { 
+          id: 5, 
+          name: 'Panel Solar', 
+          value: '88%', 
+          valueClass: 'badge-green', 
+          sector: 'Puerto Varas', 
+          status: 'Bueno',
+          type: 'electric'
+        }
+      ],
+
+      selectedFilter: null
+    }
+  },
+
+  mounted() {
+    // Verificar autenticación al cargar la página principal
+    if (process.client) {
+      try {
+        console.log('Principal.vue mounted hook started');
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        console.log('Is Authenticated:', isAuthenticated);
+        if (!isAuthenticated) {
+          // Redirigir a login si no está autenticado
+          console.log('User not authenticated, redirecting to login');
+        }
+        
+        // Cargar preferencia de tema oscuro
+        this.darkMode = localStorage.getItem('darkMode') === 'true';
+        console.log('Dark mode preference:', this.darkMode);
+        console.log('Alerts data:', this.alerts);
+        console.log('Assets data:', this.assets);
+      } catch (e) {
+        console.error('Error verificando autenticación:', e);
       }
-    })
-  }
-  
-  return assets.value
-})
+    }
+    console.log('Principal.vue mounted hook finished');
+  },
 
-// Métodos
-const clearFilter = () => {
-  selectedFilter.value = null
-}
+  computed: {
+    filteredAssets() {
+      if (!this.selectedFilter) {
+        return this.assets
+      }
+      
+      // Filtrar por tipo de activo
+      if (this.selectedFilter === 'temp' || 
+          this.selectedFilter === 'electric' || 
+          this.selectedFilter === 'vib') {
+        return this.assets.filter(asset => asset.type === this.selectedFilter)
+      }
+      
+      // Filtrar por lugar (sector)
+      if (this.selectedFilter === 'lugar') {
+        // Agrupar por sector único para este ejemplo
+        const uniqueSectors = [...new Set(this.assets.map(a => a.sector))]
+        return uniqueSectors.map(sector => {
+          const assetsInSector = this.assets.filter(a => a.sector === sector)
+          return {
+            id: `sector-${sector}`,
+            name: `Sector: ${sector}`,
+            value: `${assetsInSector.length} dispositivos`,
+            valueClass: 'badge-info',
+            sector: sector,
+            status: 'Informativo',
+            type: 'lugar'
+          }
+        })
+      }
+      
+      return this.assets
+    }
+  },
 
-const toggleTheme = () => {
-  darkMode.value = !darkMode.value
-  if (process.client) {
-    localStorage.setItem('darkMode', darkMode.value)
-  }
-}
-
-const initializeComponent = () => {
-  if (process.client) {
-    try {
-      console.log('Principal.vue initialization started')
-      
-      // Cargar preferencia de tema oscuro
-      darkMode.value = localStorage.getItem('darkMode') === 'true'
-      console.log('Dark mode preference:', darkMode.value)
-      
-      // Finalizar carga con un pequeño delay para asegurar renderizado
-      setTimeout(() => {
-        isLoading.value = false
-      }, 100)
-      
-    } catch (e) {
-      console.error('Error initializing component:', e)
-      isLoading.value = false
+  methods: {
+    clearFilter() {
+      this.selectedFilter = null
+    },
+    
+    toggleTheme() {
+      this.darkMode = !this.darkMode;
+      localStorage.setItem('darkMode', this.darkMode);
     }
   }
 }
-
-// Hooks del ciclo de vida
-onBeforeMount(() => {
-  initializeComponent()
-})
-
-onMounted(() => {
-  initializeComponent()
-})
 </script>
 
 <style scoped>
@@ -258,47 +256,6 @@ onMounted(() => {
   background: #444;
 }
 
-/* Pantalla de carga */
-.loading-screen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
-  background: #f7f7fb;
-  color: #333;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border-left-color: #09f;
-  animation: spin 1s ease infinite;
-  margin-bottom: 15px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.dark-mode .loading-screen {
-  background: #121212;
-  color: #f0f0f0;
-}
-
-.dark-mode .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-left-color: #09f;
-}
-
 @media (max-width: 767.98px) {
   .main-content {
     margin-left: 0;
@@ -323,4 +280,4 @@ onMounted(() => {
     padding-right: 0.5rem;
   }
 }
-</style>
+</style> 

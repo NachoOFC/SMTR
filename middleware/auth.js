@@ -4,21 +4,38 @@
 // Middleware para verificar autenticación con Firebase
 import { defineNuxtRouteMiddleware, navigateTo } from '#app'
 import { useNuxtApp } from '#app'
+import { watch } from 'vue' // Importa watch
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Accede al estado de autenticación proporcionado por tu plugin de Firebase
-  const { $isAuthenticated } = useNuxtApp().provide;
+  // Accede a los estados de autenticación proporcionados por tu plugin de Firebase
+  const { $isAuthenticated, $isAuthReady } = useNuxtApp().provide;
 
-  // Verifica si el usuario no está autenticado
-  // Nota: Dependiendo de cómo tu plugin de Firebase maneje el estado inicial
-  // y el listener de onAuthStateChanged, puede que necesites una forma más robusta
-  // de esperar a que el estado de autenticación sea determinado en la carga inicial.
-  // Este middleware asume que $isAuthenticated se actualizará reactivamente.
-
-  if (!$isAuthenticated.value) {
-    console.log('Middleware auth: User not authenticated, redirecting to /login');
+  // Si la autenticación ya está lista y el usuario no está autenticado, redirige inmediatamente.
+  // Esto cubre casos donde el middleware se ejecuta después de que Firebase ya inicializó.
+  if ($isAuthReady.value && !$isAuthenticated.value) {
+    console.log('Middleware auth (ready): User not authenticated, redirecting to /login');
     return navigateTo('/login');
   }
 
-  console.log('Middleware auth: User is authenticated.');
+  // Si la autenticación aún no está lista, espera a que lo esté.
+  if (!$isAuthReady.value) {
+    console.log('Middleware auth (waiting): Waiting for auth to be ready.');
+    await new Promise(resolve => {
+      // Observa cuando isAuthReady cambia a true
+      const unwatch = watch($isAuthReady, (newValue) => {
+        if (newValue) {
+          unwatch(); // Deja de observar una vez que esté listo
+          resolve();
+        }
+      });
+    });
+
+    // Una vez que la autenticación está lista, verifica si el usuario está autenticado y redirige si es necesario.
+    if (!$isAuthenticated.value) {
+      console.log('Middleware auth (waited): User not authenticated after waiting, redirecting to /login');
+      return navigateTo('/login');
+    }
+  }
+
+  console.log('Middleware auth: User is authenticated (or was redirected).');
 }); 

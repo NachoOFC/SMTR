@@ -7,6 +7,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   // Variables reactivas para el estado de autenticación
   const user = ref(null);
   const isAuthenticated = ref(false);
+  const isAuthReady = ref(false);
   let auth = null;
 
   // Solo inicializar Firebase en el cliente
@@ -31,17 +32,22 @@ export default defineNuxtPlugin((nuxtApp) => {
       onAuthStateChanged(auth, (currentUser) => {
         user.value = currentUser;
         isAuthenticated.value = !!currentUser;
+        isAuthReady.value = true;
       });
     } catch (error) {
       console.error('Error initializing Firebase:', error);
+      isAuthReady.value = true;
     }
+  } else {
+    isAuthReady.value = true;
   }
 
   return {
     provide: {
       auth: auth,
       user: readonly(user),
-      isAuthenticated: readonly(isAuthenticated)
+      isAuthenticated: readonly(isAuthenticated),
+      isAuthReady: readonly(isAuthReady)
     }
   };
 });

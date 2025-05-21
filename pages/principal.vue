@@ -48,6 +48,8 @@ export default {
     AssetList
   },
 
+  middleware: ['auth'],
+
   data() {
     return {
       darkMode: false,
@@ -116,24 +118,17 @@ export default {
   },
 
   mounted() {
-    // Verificar autenticación al cargar la página principal
+    console.log('Principal.vue mounted hook started');
+    // La autenticación ahora se maneja en el middleware 'auth'.
+    // Eliminar la lógica de verificación de autenticación y redirección de aquí.
+
+    // Cargar preferencia de tema oscuro (esto sí se mantiene aquí si quieres)
     if (process.client) {
       try {
-        console.log('Principal.vue mounted hook started');
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        console.log('Is Authenticated:', isAuthenticated);
-        if (!isAuthenticated) {
-          // Redirigir a login si no está autenticado
-          console.log('User not authenticated, redirecting to login');
-        }
-        
-        // Cargar preferencia de tema oscuro
         this.darkMode = localStorage.getItem('darkMode') === 'true';
         console.log('Dark mode preference:', this.darkMode);
-        console.log('Alerts data:', this.alerts);
-        console.log('Assets data:', this.assets);
       } catch (e) {
-        console.error('Error verificando autenticación:', e);
+        console.error('Error loading dark mode preference:', e);
       }
     }
     console.log('Principal.vue mounted hook finished');

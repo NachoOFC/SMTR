@@ -108,6 +108,7 @@
 
 <script>
 import AvatarSelector from './AvatarSelector.vue'
+import { getAuth, signOut } from 'firebase/auth'
 
 export default {
   components: {
@@ -256,13 +257,19 @@ export default {
     
     // Cerrar sesión
     logout() {
-      // Limpiar autenticación
-      localStorage.removeItem('isAuthenticated');
-      
-      // Mantener los datos de usuario para futuras sesiones
-      
-      // Redirigir al login
-      window.location.href = '/login';
+      const auth = getAuth(); // Asegúrate de que getAuth esté disponible
+      signOut(auth)
+        .then(() => {
+          // Limpiar autenticación local si es necesario (aunque el listener de onAuthStateChanged debería encargarse)
+          localStorage.removeItem('isAuthenticated');
+          // Redirigir al login
+          this.$router.push('/login');
+        })
+        .catch((error) => {
+          console.error('Error al cerrar sesión:', error);
+          // Puedes mostrar un mensaje de error al usuario si lo deseas
+          alert('Error al cerrar sesión. Por favor, intenta de nuevo.');
+        });
     },
     
     // Cerrar el menú al hacer clic fuera

@@ -119,19 +119,24 @@ export default {
     // Verificar autenticación al cargar la página principal
     if (process.client) {
       try {
+        console.log('Principal.vue mounted hook started');
         const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        console.log('Is Authenticated:', isAuthenticated);
         if (!isAuthenticated) {
           // Redirigir a login si no está autenticado
-          window.location.href = '/login';
+          console.log('User not authenticated, redirecting to login');
         }
         
         // Cargar preferencia de tema oscuro
         this.darkMode = localStorage.getItem('darkMode') === 'true';
+        console.log('Dark mode preference:', this.darkMode);
+        console.log('Alerts data:', this.alerts);
+        console.log('Assets data:', this.assets);
       } catch (e) {
         console.error('Error verificando autenticación:', e);
-        window.location.href = '/login';
       }
     }
+    console.log('Principal.vue mounted hook finished');
   },
 
   computed: {

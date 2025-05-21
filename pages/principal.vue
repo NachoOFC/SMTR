@@ -3,7 +3,7 @@
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
-      <div class="container-fluid px-md-4" v-if="$isAuthReady">
+      <div class="container-fluid px-md-4">
         <div class="row">
           <div class="col-12">
             <AlertList :alerts="alerts" :darkMode="darkMode" class="mt-3" />
@@ -28,9 +28,6 @@
           </div>
         </div>
       </div>
-      <div v-else class="container-fluid px-md-4">
-        <p>Cargando contenido...</p>
-      </div>
     </div>
   </div>
 </template>
@@ -52,8 +49,6 @@ export default {
   },
 
   middleware: ['auth'],
-
-  inject: ['$isAuthReady'],
 
   data() {
     return {

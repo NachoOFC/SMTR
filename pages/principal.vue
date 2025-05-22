@@ -39,6 +39,7 @@ import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
 
+
 export default {
   components: {
     Sidebar,
@@ -120,7 +121,7 @@ export default {
     if (process.client) {
       try {
         console.log('Principal.vue mounted hook started');
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        
         console.log('Is Authenticated:', isAuthenticated);
         if (!isAuthenticated) {
           // Redirigir a login si no está autenticado

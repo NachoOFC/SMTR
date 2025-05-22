@@ -23,7 +23,7 @@ FIREBASE_CONFIG_FILENAME = 'google-services.json'
 FIREBASE_CONFIG_FILE = os.path.join(script_dir, FIREBASE_CONFIG_FILENAME)
 
 
-SERVICE_ACCOUNT_KEY_FILENAME = 'innovacionproyectos-e79cc-firebase-adminsdk-fbsvc-4b32bfb586.json' 
+SERVICE_ACCOUNT_KEY_FILENAME = 'innovacionproyectos-e79cc-firebase-adminsdk-fbsvc-79a0b32e42.json' 
 
 FIREBASE_CERTIFICATE_PATH = os.path.join(script_dir, SERVICE_ACCOUNT_KEY_FILENAME)
 

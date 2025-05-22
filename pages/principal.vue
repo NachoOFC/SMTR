@@ -122,10 +122,12 @@ export default {
       try {
         console.log('Principal.vue mounted hook started');
         
-        console.log('Is Authenticated:', isAuthenticated);
-        if (!isAuthenticated) {
+        const { $isAuthenticated } = useNuxtApp();
+        console.log('Is Authenticated:', $isAuthenticated.value);
+        if (!$isAuthenticated.value) {
           // Redirigir a login si no está autenticado
           console.log('User not authenticated, redirecting to login');
+          navigateTo('/login', { replace: true });
         }
         
         // Cargar preferencia de tema oscuro

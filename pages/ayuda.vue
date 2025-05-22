@@ -21,6 +21,7 @@
 <script>
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
+import { useNuxtApp } from '#app'
 
 export default {
   components: {
@@ -36,16 +37,11 @@ export default {
 
   mounted() {
     if (process.client) {
-      try {
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        if (!isAuthenticated) {
-          window.location.href = '/login';
-        }
-        this.darkMode = localStorage.getItem('darkMode') === 'true';
-      } catch (e) {
-        console.error('Error verificando autenticación:', e);
-        window.location.href = '/login';
+      const { $isAuthenticated } = useNuxtApp();
+      if (!$isAuthenticated.value) {
+        navigateTo('/login', { replace: true });
       }
+      this.darkMode = localStorage.getItem('darkMode') === 'true';
     }
   },
   

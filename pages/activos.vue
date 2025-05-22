@@ -99,6 +99,7 @@
 <script>
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
+import { useNuxtApp } from '#app'
 
 export default {
   components: {
@@ -171,21 +172,14 @@ export default {
   },
 
   mounted() {
-    // Verificar autenticación al cargar la página
     if (process.client) {
-      try {
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        if (!isAuthenticated) {
-          // Redirigir a login si no está autenticado
-          window.location.href = '/login';
-        }
-        
-        // Cargar preferencia de tema oscuro
-        this.darkMode = localStorage.getItem('darkMode') === 'true';
-      } catch (e) {
-        console.error('Error verificando autenticación:', e);
-        window.location.href = '/login';
+      const { $isAuthenticated } = useNuxtApp();
+      if (!$isAuthenticated.value) {
+        navigateTo('/login', { replace: true });
       }
+      
+      // Cargar preferencia de tema oscuro
+      this.darkMode = localStorage.getItem('darkMode') === 'true';
     }
   },
   

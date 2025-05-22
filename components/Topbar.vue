@@ -256,12 +256,10 @@ export default {
     },
     
     // Cerrar sesión
-    logout() {
+    async logout() {
       const auth = getAuth(); // Asegúrate de que getAuth esté disponible
       signOut(auth)
         .then(() => {
-          // Limpiar autenticación local si es necesario (aunque el listener de onAuthStateChanged debería encargarse)
-          localStorage.removeItem('isAuthenticated');
           // Redirigir al login
           this.$router.push('/login');
         })

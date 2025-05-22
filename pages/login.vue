@@ -79,8 +79,6 @@ onMounted(async () => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         router.push("/principal");
-      } else {
-        localStorage.removeItem("isAuthenticated");
       }
     });
 
@@ -104,7 +102,6 @@ const handleLogin = async () => {
       "user",
       JSON.stringify({ uid: user.uid, email: user.email })
     );
-    localStorage.setItem("isAuthenticated", "true");
     router.push("/principal");
   } catch (error) {
     switch (error.code) {

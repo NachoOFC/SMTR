@@ -141,7 +141,8 @@ export default {
 .dashboard {
   display: flex;
   min-height: 100vh;
-  background: #f7f7fb;
+  background: #f7f7fb; /* Fondo claro principal */
+  color: #333; /* Texto claro principal */
 }
 
 .main-content {
@@ -164,12 +165,13 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
-  background: white;
+  background: white; /* Fondo claro para filtros */
   padding: 1.2rem;
   border-radius: 0.8rem;
   margin-bottom: 1.5rem;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  color: #333; /* Texto claro para filtros */
 }
 
 .filter-group {
@@ -184,22 +186,19 @@ h1 {
   gap: 0.5rem;
 }
 
-.date-input {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-}
-
+.date-input,
 .select-filter {
   padding: 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid #ddd; /* Borde claro */
   border-radius: 0.5rem;
+  background: white; /* Fondo claro */
+  color: #333; /* Texto claro */
   min-width: 180px;
 }
 
 .btn-filter {
-  background: #1e4d92;
-  color: white;
+  background: #1e4d92; /* Fondo claro del botón */
+  color: white; /* Texto claro del botón */
   border: none;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
@@ -208,11 +207,12 @@ h1 {
 }
 
 .history-table {
-  background: white;
+  background: white; /* Fondo claro de la tabla */
   border-radius: 0.8rem;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   overflow-x: auto;
+  color: #333; /* Texto claro de la tabla */
 }
 
 table {
@@ -223,13 +223,13 @@ table {
 th {
   text-align: left;
   padding: 1rem 0.5rem;
-  border-bottom: 2px solid #eee;
-  color: #555;
+  border-bottom: 2px solid #eee; /* Borde claro */
+  color: #555; /* Texto claro encabezado */
 }
 
 td {
   padding: 1rem 0.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eee; /* Borde claro */
 }
 
 .tag {
@@ -277,8 +277,9 @@ td {
 
 .btn-details {
   padding: 0.4rem 0.8rem;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: #f5f5f5; /* Fondo claro del botón detalles */
+  border: 1px solid #ddd; /* Borde claro del botón detalles */
+  color: #333; /* Texto claro del botón detalles */
   border-radius: 0.5rem;
   cursor: pointer;
 }
@@ -293,40 +294,42 @@ td {
 
 /* Estilos para modo oscuro */
 .dark-mode {
-  background: #121212;
-  color: #f0f0f0;
+  background: #121212; /* Fondo oscuro principal */
+  color: #f0f0f0; /* Texto oscuro principal */
 }
 
 .dark-mode .history-filters,
 .dark-mode .history-table {
-  background: #272741;
+  background: #272741; /* Fondo oscuro para filtros y tabla */
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  color: #f0f0f0; /* Texto oscuro para filtros y tabla */
 }
 
 .dark-mode .date-input,
 .dark-mode .select-filter {
-  background: #1a1a2e;
-  border-color: #3a3a55;
-  color: #f0f0f0;
+  background: #1a1a2e; /* Fondo oscuro para inputs/selects */
+  border-color: #3a3a55; /* Borde oscuro */
+  color: #f0f0f0; /* Texto oscuro */
 }
 
 .dark-mode .btn-filter {
-  background: #3a3a90;
+  background: #3a3a90; /* Fondo oscuro del botón */
+  color: white; /* Texto oscuro del botón */
 }
 
 .dark-mode th {
-  color: #e0e0e0;
-  border-bottom-color: #3a3a55;
+  color: #e0e0e0; /* Texto oscuro encabezado */
+  border-bottom-color: #3a3a55; /* Borde oscuro */
 }
 
 .dark-mode td {
-  border-bottom-color: #3a3a55;
+  border-bottom-color: #3a3a55; /* Borde oscuro */
 }
 
 .dark-mode .btn-details {
-  background: #1a1a2e;
-  border-color: #3a3a55;
-  color: #f0f0f0;
+  background: #1a1a2e; /* Fondo oscuro del botón detalles */
+  border-color: #3a3a55; /* Borde oscuro del botón detalles */
+  color: #f0f0f0; /* Texto oscuro del botón detalles */
 }
 
 .dark-mode .page-btn {
@@ -346,28 +349,61 @@ td {
     margin-bottom: 60px;
   }
   
-  .container-fluid {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  
   .history-filters {
-    flex-direction: column;
-    align-items: stretch;
+    padding: 1rem;
   }
   
   .filter-group {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.5rem;
   }
-  
+
   .date-inputs {
-    width: 100%;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .date-inputs span {
+    display: none;
+  }
+
+  .date-input, .select-filter {
+    width: 100%;
   }
   
   .btn-filter {
     margin-left: 0;
+    width: 100%;
+  }
+  
+  .history-table {
+    padding: 0.5rem;
+  }
+
+  th, td {
+    padding: 0.8rem 0.3rem;
+  }
+
+  .tag,
+  .status {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .btn-details {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .history-filters {
+    gap: 1rem;
+  }
+  
+  .filter-group {
     width: 100%;
   }
 }

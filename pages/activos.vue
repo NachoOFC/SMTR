@@ -82,15 +82,6 @@
           </div>
         </div>
         
-        <div class="pagination">
-          <button class="page-btn">&lt;</button>
-          <button class="page-btn active">1</button>
-          <button class="page-btn">2</button>
-          <button class="page-btn">3</button>
-          <span>...</span>
-          <button class="page-btn">5</button>
-          <button class="page-btn">&gt;</button>
-        </div>
       </div>
     </div>
   </div>

@@ -24,7 +24,7 @@
         
         <div class="row mt-3">
           <div class="col-12">
-            <AssetList :assets="filteredAssets" />
+            <AssetList :assets="filteredAssets" :darkMode="darkMode" />
           </div>
         </div>
       </div>

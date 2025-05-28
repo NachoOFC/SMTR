@@ -25,11 +25,11 @@
               <i class="bi bi-clipboard-data-fill icon"></i> Historial
             </NuxtLink>
           </li>
-          <li>
+          <!-- <li>
             <NuxtLink to="/activos" class="menu-link" active-class="active">
               <i class="bi bi-hdd-rack-fill icon"></i> Activos
             </NuxtLink>
-          </li>
+          </li> -->
         </ul>
       </nav>
       <div class="sidebar-bottom">
@@ -70,14 +70,14 @@
             <i class="bi bi-clipboard-data-fill"></i>
             <span>Historial</span>
           </NuxtLink>
-          <NuxtLink
+          <!-- <NuxtLink
             to="/activos"
             class="navbar-mobile-item"
             active-class="active"
           >
             <i class="bi bi-hdd-rack-fill"></i>
             <span>Activos</span>
-          </NuxtLink>
+          </NuxtLink> -->
           <div class="dropdown dropup">
             <button
               class="navbar-mobile-item dropdown-toggle"

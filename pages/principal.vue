@@ -38,7 +38,8 @@ import Topbar from '~/components/Topbar.vue'
 import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
-
+import { useNuxtApp } from '#app'
+import { getDatabase, ref, onValue } from "firebase/database"; // Importar módulos de Realtime Database
 
 export default {
   components: {
@@ -64,53 +65,8 @@ export default {
         { label: 'Vibracion', value: 'vib' }
       ],
 
-      assets: [
-        { 
-          id: 10, 
-          name: 'Batería Leandro', 
-          value: '90%', 
-          valueClass: 'badge-green', 
-          sector: 'Los Muermos', 
-          status: 'Bueno',
-          type: 'electric'
-        },
-        { 
-          id: 2, 
-          name: 'Tablero de Distribución', 
-          value: '70°C', 
-          valueClass: 'asset-value temp', 
-          sector: 'Puerto Varas', 
-          status: 'Crítico',
-          type: 'temp'
-        },
-        { 
-          id: 3, 
-          name: 'Motor Portón Elec.', 
-          value: '2,9g', 
-          valueClass: 'asset-value vib', 
-          sector: 'Osorno', 
-          status: 'Precaución',
-          type: 'vib'
-        },
-        { 
-          id: 4, 
-          name: 'Sensor Puerta Principal', 
-          value: 'Activo', 
-          valueClass: 'badge-green', 
-          sector: 'Los Muermos', 
-          status: 'Bueno',
-          type: 'electric'
-        },
-        { 
-          id: 5, 
-          name: 'Panel Solar', 
-          value: '88%', 
-          valueClass: 'badge-green', 
-          sector: 'Puerto Varas', 
-          status: 'Bueno',
-          type: 'electric'
-        }
-      ],
+      // Datos de activos ahora inicializados como vacío
+      assets: [],
 
       selectedFilter: null
     }
@@ -133,10 +89,12 @@ export default {
         // Cargar preferencia de tema oscuro
         this.darkMode = localStorage.getItem('darkMode') === 'true';
         console.log('Dark mode preference:', this.darkMode);
-        console.log('Alerts data:', this.alerts);
-        console.log('Assets data:', this.assets);
+        
+        // Cargar datos de activos desde Firebase
+        this.fetchAssets();
+
       } catch (e) {
-        console.error('Error verificando autenticación:', e);
+        console.error('Error en mounted hook:', e);
       }
     }
     console.log('Principal.vue mounted hook finished');
@@ -185,6 +143,106 @@ export default {
     toggleTheme() {
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);
+    },
+
+    // Método para obtener datos de Firebase
+    fetchAssets() {
+      const db = getDatabase();
+      const assetsRef = ref(db, 'components/1/data'); // Referencia ajustada a la ubicación correcta
+
+      onValue(assetsRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedAssets = [];
+        
+        // Transformar los datos de Firebase a la estructura esperada
+        if (data) {
+          for (const timestamp in data) {
+            const assetData = data[timestamp];
+            
+            let displayValue = 'N/A';
+            let assetStatus = 'Desconocido';
+            let assetType = 'general';
+            let valueClass = 'badge-secondary'; // Clase por defecto para el badge
+
+            // Procesar los valores para encontrar el principal a mostrar y determinar el estado/tipo
+            if (assetData.values) {
+              const valuesKeys = Object.keys(assetData.values);
+              if (valuesKeys.length > 0) {
+                // Tomar el primer valor como valor principal a mostrar
+                const firstValueKey = valuesKeys[0];
+                const firstValue = assetData.values[firstValueKey];
+                // Intentar añadir la unidad si está presente en el nombre de la clave
+                const unitMatch = firstValueKey.match(/\((.*)\)/);
+                const unit = unitMatch ? unitMatch[1] : '';
+                displayValue = `${firstValue}${unit ? ' ' + unit : ''}`.trim();
+
+                // Lógica básica para determinar estado, tipo y clase basada en valores y asset_type
+                const lowerCaseKey = firstValueKey.toLowerCase();
+                const lowerCaseAssetType = assetData.asset_type ? assetData.asset_type.toLowerCase() : '';
+
+                if (lowerCaseKey.includes('temperatura') || lowerCaseKey.includes('°c') || lowerCaseAssetType.includes('temperatura')) {
+                  assetType = 'temp';
+                   if (parseFloat(firstValue) > 70) {
+                     valueClass = 'bg-danger';
+                     assetStatus = 'Crítico';
+                   } else if (parseFloat(firstValue) > 60) {
+                     valueClass = 'bg-warning text-dark';
+                     assetStatus = 'Precaución';
+                   } else {
+                      valueClass = 'bg-success';
+                      assetStatus = 'Bueno';
+                   }
+                } else if (lowerCaseKey.includes('consumo') || lowerCaseKey.includes('kwh') || lowerCaseAssetType.includes('electric') || lowerCaseAssetType.includes('eléctric')) {
+                  assetType = 'electric';
+                   if (parseFloat(firstValue) > 100) {
+                      valueClass = 'bg-warning text-dark';
+                      assetStatus = 'Precaución';
+                   } else {
+                      valueClass = 'bg-success';
+                       assetStatus = 'Bueno';
+                   }
+                } else if (lowerCaseKey.includes('vibracion') || lowerCaseKey.includes('g') || lowerCaseAssetType.includes('vibracion')) {
+                   assetType = 'vib';
+                   if (parseFloat(firstValue) > 5) {
+                       valueClass = 'bg-danger';
+                       assetStatus = 'Crítico';
+                   } else if (parseFloat(firstValue) > 2) {
+                      valueClass = 'bg-warning text-dark';
+                      assetStatus = 'Precaución';
+                   } else {
+                       valueClass = 'bg-success';
+                       assetStatus = 'Bueno';
+                   }
+                } else {
+                  // Si no coincide con tipos conocidos, usar un estado/clase genérico
+                   if (firstValue !== null && firstValue !== undefined && firstValue !== '') {
+                       valueClass = 'bg-success'; // Asumir bueno si hay algún valor y tipo desconocido
+                       assetStatus = 'Bueno';
+                   } else {
+                       valueClass = 'badge-secondary';
+                       assetStatus = 'Desconocido';
+                   }
+                }
+              }
+            }
+            
+            loadedAssets.push({
+              id: timestamp, // Usar el timestamp como ID
+              name: assetData.asset_type || 'Sin Nombre', // Usar asset_type o un valor por defecto
+              value: displayValue, // El valor procesado
+              valueClass: valueClass, // Clase del badge
+              sector: assetData.sector_location || 'Sin Sector', // Usar sector_location o valor por defecto
+              status: assetStatus, // El estado determinado
+              type: assetType // El tipo determinado
+            });
+          }
+        }
+
+        this.assets = loadedAssets;
+        console.log('Datos de Firebase cargados y mapeados:', this.assets);
+      }, (error) => {
+        console.error('Error al cargar datos de Firebase:', error);
+      });
     }
   }
 }

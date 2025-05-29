@@ -3,10 +3,7 @@
     <!-- Sidebar para pantallas medianas y grandes -->
     <aside class="sidebar d-none d-md-flex">
       <div class="logo-section">
-        <span class="logo-icon"
-          ><i class="bi bi-lightning-charge-fill"></i
-        ></span>
-        <span class="logo-text">SMTR</span>
+        <img src="/SMTR.png" alt="Logo SMTR" class="sidebar-logo" />
       </div>
       <nav class="menu">
         <ul>
@@ -144,7 +141,7 @@ export default {
 
 <style scoped>
 .sidebar {
-  background: #1e4d92;
+  background: #2c3e50;
   color: #fff;
   width: 220px;
   height: 100vh;
@@ -162,11 +159,14 @@ export default {
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.3rem;
-  font-weight: bold;
+  justify-content: center;
   margin-bottom: 2rem;
   padding-left: 0.5rem;
+}
+
+.sidebar-logo {
+  height: 80px;
+  width: auto;
 }
 
 .menu ul {
@@ -193,7 +193,7 @@ export default {
 
 .menu-link:hover,
 .menu-link.active {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-bottom {
@@ -250,6 +250,13 @@ export default {
 
   .navbar-mobile-item i {
     font-size: 1.1rem;
+  }
+}
+
+/* Media query para ocultar el sidebar en móviles */
+@media (max-width: 767.98px) {
+  .sidebar {
+    transform: translateX(-100%);
   }
 }
 </style>

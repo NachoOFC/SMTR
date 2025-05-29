@@ -1,11 +1,32 @@
 <script>
+import GlobalLoader from '~/components/GlobalLoader.vue'
+
 export default {
-  middleware: ['auth']
+  components: {
+    GlobalLoader
+  },
+  middleware: ['auth'],
+  data() {
+    return {
+      isLoading: true
+    }
+  },
+  mounted() {
+    // Ocultar el loader después de que la aplicación esté lista
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.isLoading = false
+      }, 500)
+    })
+  }
 }
 </script>
 
 <template>
-  <NuxtPage />
+  <div>
+    <GlobalLoader :isLoading="isLoading" />
+    <NuxtPage />
+  </div>
 </template>
 
 <style>

@@ -2,7 +2,7 @@
   <div class="asset-list">
     <div class="row g-3">
       <div v-for="asset in assets" :key="asset.id" class="col-12 col-md-6 col-lg-4">
-        <AssetCard :asset="asset" :darkMode="darkMode" />
+        <AssetCard :asset="asset" :darkMode="darkMode" @asset-clicked="handleAssetClick" />
       </div>
       
       <div v-if="assets.length === 0" class="col-12 text-center py-5">
@@ -35,6 +35,12 @@ export default {
   data() {
     return {
       // No data por ahora
+    }
+  },
+
+  methods: {
+    handleAssetClick(assetId) {
+      this.$emit('select-asset', assetId);
     }
   }
 }

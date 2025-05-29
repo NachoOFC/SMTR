@@ -117,11 +117,7 @@ export default {
 
   mounted() {
     // Obtener el nombre de usuario al cargar el componente
-    try {
-      this.userName = localStorage.getItem("user") || "Usuario";
-    } catch (e) {
-      console.error("Error al obtener el nombre de usuario:", e);
-    }
+    
   },
 
   methods: {

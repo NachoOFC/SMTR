@@ -6,7 +6,7 @@
       <div class="container-fluid px-md-4">
         
         
-        <div class="row mt-4">
+        <div class="row mt-4" v-if="!selectedAssetId">
           <div class="col-12">
             <div class="filter-section">
               <h3 class="filter-title">Activos según:</h3>
@@ -18,11 +18,18 @@
           </div>
         </div>
         
-        <div class="row mt-3">
+        <div class="row mt-3" v-if="!selectedAssetId">
           <div class="col-12">
-            <AssetList :assets="filteredAssets" :darkMode="darkMode" />
+            <AssetList :assets="filteredAssets" :darkMode="darkMode" @select-asset="handleAssetSelection" />
           </div>
         </div>
+        
+        <div class="row mt-3" v-if="selectedAssetId">
+           <div class="col-12">
+             <AssetDetail :assetId="selectedAssetId" :darkMode="darkMode" @back="clearAssetSelection"/>
+           </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -34,6 +41,7 @@ import Topbar from '~/components/Topbar.vue'
 //import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
+import AssetDetail from '~/components/AssetDetail.vue'
 import { useNuxtApp } from '#app'
 import { getDatabase, ref, onValue } from "firebase/database"; // Importar módulos de Realtime Database
 
@@ -43,7 +51,8 @@ export default {
     Topbar,
     //AlertList,
     FilterChips,
-    AssetList
+    AssetList,
+    AssetDetail
   },
 
   data() {
@@ -61,7 +70,8 @@ export default {
       // Datos de activos ahora inicializados como vacío
       assets: [],
 
-      selectedFilter: null
+      selectedFilter: null,
+      selectedAssetId: null
     }
   },
 
@@ -248,6 +258,14 @@ export default {
       }, (error) => {
         console.error('Error al cargar datos de Firebase:', error);
       });
+    },
+
+    handleAssetSelection(assetId) {
+      this.selectedAssetId = assetId;
+    },
+
+    clearAssetSelection() {
+      this.selectedAssetId = null;
     }
   }
 }

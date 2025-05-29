@@ -33,6 +33,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         user.value = currentUser;
         isAuthenticated.value = !!currentUser;
         isAuthReady.value = true;
+
+        
       });
     } catch (error) {
       console.error('Error initializing Firebase:', error);

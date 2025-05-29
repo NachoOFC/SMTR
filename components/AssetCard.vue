@@ -1,5 +1,5 @@
 <template>
-  <div class="asset-card">
+  <div class="asset-card" @click="handleClick">
     <div :class="['card h-100 shadow-sm', darkMode ? 'dark-mode' : '']">
       <div class="card-body">
         <div class="asset-header">
@@ -52,6 +52,12 @@ export default {
     return {
       // No data por ahora
     }
+  },
+
+  methods: {
+    handleClick() {
+      this.$emit('asset-clicked', this.asset.id);
+    }
   }
 }
 </script>
@@ -59,6 +65,7 @@ export default {
 <style scoped>
 .asset-card {
   height: 100%; /* Para que todas las tarjetas tengan la misma altura */
+  cursor: pointer;
 }
 
 .card {

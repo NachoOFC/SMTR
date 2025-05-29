@@ -153,25 +153,8 @@ export default {
   },
   
   computed: {
-    // Nombre del usuario desde localStorage
-    userName() {
-      return localStorage.getItem('user') || 'Usuario';
-    },
     
-    // Email almacenado en localStorage
-    userEmail() {
-      return localStorage.getItem('userEmail') || '';
-    },
     
-    // Rol del usuario
-    userRole() {
-      return localStorage.getItem('userRole') || 'Técnico';
-    },
-    
-    // Departamento del usuario
-    userDepartment() {
-      return localStorage.getItem('userDepartment') || 'Sistemas Eléctricos';
-    },
     
     // Avatar actual del usuario - siempre fresco desde localStorage
     currentAvatarClass() {
@@ -237,12 +220,6 @@ export default {
     },
     
     saveProfile() {
-      // Guardar datos en localStorage
-      localStorage.setItem('user', this.editedName);
-      localStorage.setItem('userEmail', this.editedEmail);
-      localStorage.setItem('userRole', this.editedRole);
-      localStorage.setItem('userDepartment', this.editedDepartment);
-      localStorage.setItem('userAvatar', JSON.stringify(this.selectedAvatar));
       
       // Forzar actualización completa del componente
       this.refreshKey++;

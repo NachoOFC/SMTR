@@ -2,9 +2,8 @@
   <div v-if="isClient" class="login-container" :class="{ 'dark-mode': isDarkMode }">
     <div class="login-box">
       <div class="logo-container">
-        <i class="bi bi-lightning-charge-fill"></i>
+        <img src="/SMTR.png" alt="Logo SMTR" class="login-logo" />
       </div>
-      <h2>SMTR</h2>
       <p class="subtitle">Sistema de Monitoreo en Tiempo Real</p>
       <form @submit.prevent="handleLogin">
         <div class="form-group">
@@ -158,13 +157,9 @@ const toggleTheme = () => {
   margin-bottom: 1.5rem;
 }
 
-.logo-container i {
-  font-size: 3rem;
-  color: #1e4d92;
-  background: #f0f4f8;
-  padding: 1rem;
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(30, 77, 146, 0.2);
+.login-logo {
+  height: 80px; /* Ajusta esta altura según necesites */
+  width: auto; /* Mantiene la proporción */
 }
 
 .login-box h2 {
@@ -331,6 +326,7 @@ const toggleTheme = () => {
 .dark-mode .form-group input:focus {
   border-color: #4d92e0;
   box-shadow: 0 0 0 3px rgba(77, 146, 224, 0.1);
+  outline: none;
 }
 
 .dark-mode .login-btn {

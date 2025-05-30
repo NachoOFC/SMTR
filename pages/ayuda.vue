@@ -41,7 +41,14 @@ export default {
       if (!$isAuthenticated.value) {
         navigateTo('/login', { replace: true });
       }
+      
+      // Cargar preferencia de tema oscuro y aplicar a body
       this.darkMode = localStorage.getItem('darkMode') === 'true';
+      if (this.darkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
     }
   },
   
@@ -49,6 +56,13 @@ export default {
     toggleTheme() {
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);
+      
+      // Actualizar la clase del body
+      if (this.darkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
     }
   }
 }

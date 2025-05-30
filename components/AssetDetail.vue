@@ -159,7 +159,7 @@ export default {
         // Add logo at the top
         const logoImg = new Image();
         
-        logoImg.src = '/SMTR.png'; 
+        logoImg.src = '/image.png'; 
 
         // Use a promise to wait for the image to load
         const logoLoadPromise = new Promise((resolve, reject) => {
@@ -171,7 +171,7 @@ export default {
           await logoLoadPromise;
           
           
-          const logoWidth = 40;
+          const logoWidth = 30;
           const logoHeight = logoImg.naturalHeight * (logoWidth / logoImg.naturalWidth);
           const logoX = 10; // X position
           const logoY = 10; // Y position

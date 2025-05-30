@@ -89,9 +89,13 @@ export default {
           navigateTo('/login', { replace: true });
         }
         
-        // Cargar preferencia de tema oscuro
+        // Cargar preferencia de tema oscuro y aplicar a body
         this.darkMode = localStorage.getItem('darkMode') === 'true';
-        console.log('Dark mode preference:', this.darkMode);
+        if (this.darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
         
         // Cargar datos de activos desde Firebase
         this.fetchAssets();
@@ -146,6 +150,11 @@ export default {
     toggleTheme() {
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);
+      if (this.darkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
     },
 
     // Método para obtener datos de Firebase

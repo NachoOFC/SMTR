@@ -123,15 +123,35 @@ export default {
         navigateTo('/login', { replace: true });
       }
       
-      // Cargar preferencia de tema oscuro
+      // Cargar preferencia de tema oscuro y aplicar a body
       this.darkMode = localStorage.getItem('darkMode') === 'true';
+      
+      this.$nextTick(() => {
+        if (this.darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+      });
+    }
+  },
+  
+  watch: {
+    darkMode(newVal) {
+      if (process.client) {
+        if (newVal) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+        localStorage.setItem('darkMode', newVal);
+      }
     }
   },
   
   methods: {
-    toggleTheme() {
-      this.darkMode = !this.darkMode;
-      localStorage.setItem('darkMode', this.darkMode);
+    toggleTheme(isDarkModeEnabled) {
+      this.darkMode = isDarkModeEnabled;
     }
   }
 }

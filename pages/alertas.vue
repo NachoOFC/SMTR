@@ -98,12 +98,6 @@ export default {
   methods: {
     toggleTheme() {
       this.darkMode = !this.darkMode;
-      localStorage.setItem('darkMode', this.darkMode);
-      if (this.darkMode) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
     }
   }
 }

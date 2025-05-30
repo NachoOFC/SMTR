@@ -81,7 +81,17 @@ export default {
   methods: {
     // Toggle para el modo oscuro
     toggleTheme() {
-      this.$emit('toggle-theme');
+      const isCurrentlyDarkMode = document.body.classList.contains('dark-mode');
+      const newState = !isCurrentlyDarkMode;
+      
+      if (newState) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      
+      localStorage.setItem('darkMode', newState);
+      this.$emit('toggle-theme', newState);
     },
     
     // Cargar datos del usuario desde localStorage

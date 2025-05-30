@@ -2,7 +2,7 @@
   <div v-if="isClient" class="login-container" :class="{ 'dark-mode': isDarkMode }">
     <div class="login-box">
       <div class="logo-container">
-        <img src="/SMTR.png" alt="Logo SMTR" class="login-logo" />
+        <img src="/image.png" alt="Logo SMTR" class="login-logo" />
       </div>
       <p class="subtitle">Sistema de Monitoreo en Tiempo Real</p>
       <form @submit.prevent="handleLogin">

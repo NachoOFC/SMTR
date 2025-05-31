@@ -15,17 +15,19 @@
           class="alert-box"
           :class="{
             'alert-critical': alert.level === 'Crítico',
-            'alert-warning': alert.level === 'Precaución'
+            'alert-warning': alert.level === 'Precaución',
           }"
         >
           <i
             class="bi me-2"
             :class="{
               'bi-x-octagon-fill': alert.level === 'Crítico',
-              'bi-exclamation-circle-fill': alert.level === 'Precaución'
+              'bi-exclamation-circle-fill': alert.level === 'Precaución',
             }"
           ></i>
-          <span class="alert-text">{{ alert.levelText }} - {{ alert.text }}</span>
+          <span class="alert-text"
+            >{{ alert.levelText }} - {{ alert.text }}</span
+          >
         </div>
       </transition-group>
 
@@ -37,19 +39,168 @@
 </template>
 
 <script>
+import { getDatabase, ref, onValue } from "firebase/database";
+
 export default {
   props: {
-    alerts: {
-      type: Array,
-      required: true,
-      default: () => [],
-    },
     darkMode: {
       type: Boolean,
       default: true,
     },
   },
-}
+
+  data() {
+    return {
+      assets: [],
+    };
+  },
+
+  computed: {
+    alerts() {
+      return this.assets
+        .filter(
+          (asset) => asset.status === "Crítico" || asset.status === "Precaución"
+        )
+        .map((asset) => ({
+          id: asset.id,
+          text: `${asset.name}: ${asset.value}`,
+          level: asset.status,
+          levelText: asset.status,
+        }));
+    },
+  },
+
+  mounted() {
+    this.fetchAssets();
+  },
+
+  methods: {
+    fetchAssets() {
+      const db = getDatabase();
+      const assetsRef = ref(db, "components");
+
+      onValue(
+        assetsRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          const loadedAssets = [];
+
+          if (data) {
+            for (const componentId in data) {
+              const componentData = data[componentId];
+
+              if (componentData && componentData.data) {
+                const timestampEntries = componentData.data;
+                const timestamps = Object.keys(timestampEntries).sort();
+                const latestTimestamp = timestamps[timestamps.length - 1];
+                const latestAssetData = timestampEntries[latestTimestamp];
+
+                let displayValue = "N/A";
+                let assetStatus = "Desconocido";
+                let assetType = "general";
+                let valueClass = "badge-secondary";
+
+                if (latestAssetData.values) {
+                  const valuesKeys = Object.keys(latestAssetData.values);
+                  if (valuesKeys.length > 0) {
+                    const firstValueKey = valuesKeys[0];
+                    const firstValue = latestAssetData.values[firstValueKey];
+
+                    const unitMatch = firstValueKey.match(/\((.*)\)/);
+                    const unit = unitMatch ? unitMatch[1] : "";
+                    displayValue = `${firstValue}${
+                      unit ? " " + unit : ""
+                    }`.trim();
+
+                    const lowerCaseKey = firstValueKey.toLowerCase();
+                    const lowerCaseAssetType = latestAssetData.asset_type
+                      ? latestAssetData.asset_type.toLowerCase()
+                      : "";
+
+                    if (
+                      lowerCaseKey.includes("temperatura") ||
+                      lowerCaseKey.includes("°c") ||
+                      lowerCaseAssetType.includes("temperatura")
+                    ) {
+                      assetType = "temp";
+                      if (parseFloat(firstValue) > 70) {
+                        valueClass = "bg-danger";
+                        assetStatus = "Crítico";
+                      } else if (parseFloat(firstValue) > 60) {
+                        valueClass = "bg-warning text-dark";
+                        assetStatus = "Precaución";
+                      } else {
+                        valueClass = "bg-success";
+                        assetStatus = "Bueno";
+                      }
+                    } else if (
+                      lowerCaseKey.includes("consumo") ||
+                      lowerCaseKey.includes("kwh") ||
+                      lowerCaseAssetType.includes("electric") ||
+                      lowerCaseAssetType.includes("eléctric")
+                    ) {
+                      assetType = "electric";
+                      if (parseFloat(firstValue) > 100) {
+                        valueClass = "bg-warning text-dark";
+                        assetStatus = "Precaución";
+                      } else {
+                        valueClass = "bg-success";
+                        assetStatus = "Bueno";
+                      }
+                    } else if (
+                      lowerCaseKey.includes("vibracion") ||
+                      lowerCaseKey.includes("g") ||
+                      lowerCaseAssetType.includes("vibracion")
+                    ) {
+                      assetType = "vib";
+                      if (parseFloat(firstValue) > 5) {
+                        valueClass = "bg-danger";
+                        assetStatus = "Crítico";
+                      } else if (parseFloat(firstValue) > 2) {
+                        valueClass = "bg-warning text-dark";
+                        assetStatus = "Precaución";
+                      } else {
+                        valueClass = "bg-success";
+                        assetStatus = "Bueno";
+                      }
+                    } else {
+                      if (
+                        firstValue !== null &&
+                        firstValue !== undefined &&
+                        firstValue !== ""
+                      ) {
+                        valueClass = "bg-success";
+                        assetStatus = "Bueno";
+                      } else {
+                        valueClass = "badge-secondary";
+                        assetStatus = "Desconocido";
+                      }
+                    }
+                  }
+                }
+
+                loadedAssets.push({
+                  id: componentId,
+                  name: latestAssetData.asset_type || "Sin Nombre",
+                  value: displayValue,
+                  valueClass: valueClass,
+                  sector: latestAssetData.sector_location || "Sin Sector",
+                  status: assetStatus,
+                  type: assetType,
+                });
+              }
+            }
+          }
+
+          this.assets = loadedAssets;
+        },
+        (error) => {
+          console.error("Error al cargar datos de Firebase:", error);
+        }
+      );
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -143,7 +294,8 @@ export default {
 .fade-leave-active {
   transition: opacity 0.4s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 

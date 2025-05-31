@@ -3,6 +3,7 @@
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
+      <AlertList :darkMode="darkMode" />
       
       <div class="container-fluid px-md-4">
         
@@ -39,7 +40,7 @@
 <script>
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
-//import AlertList from '~/components/AlertList.vue'
+import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
 import AssetDetail from '~/components/AssetDetail.vue'
@@ -50,7 +51,7 @@ export default {
   components: {
     Sidebar,
     Topbar,
-    //AlertList,
+    AlertList,
     FilterChips,
     AssetList,
     AssetDetail
@@ -141,17 +142,6 @@ export default {
       }
       
       return this.assets
-    },
-
-    criticalAlerts() {
-      return this.assets
-        .filter(asset => asset.status === 'Crítico' || asset.status === 'Precaución')
-        .map(asset => ({
-          id: asset.id,
-          text: `${asset.name}: ${asset.value}`,
-          level: asset.status,
-          levelText: asset.status
-        }));
     }
   },
 

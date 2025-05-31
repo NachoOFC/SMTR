@@ -3,7 +3,7 @@
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
-      <AlertList :alerts="criticalAlerts" :darkMode="darkMode" />
+      
       <div class="container-fluid px-md-4">
         
         
@@ -39,7 +39,7 @@
 <script>
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
-import AlertList from '~/components/AlertList.vue'
+//import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
 import AssetDetail from '~/components/AssetDetail.vue'

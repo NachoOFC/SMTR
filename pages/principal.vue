@@ -68,6 +68,7 @@ export default {
       ],
 
       // Datos de activos ahora inicializados como vacío
+      
       assets: [],
 
       selectedFilter: null,

@@ -1,27 +1,36 @@
 <template>
-  <section :class="['alert-list', darkMode ? 'dark-mode' : '']">
-    <div class="alert-header">
-      <div class="alert-title">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> Alertas Activas
-      </div>
-      <span class="badge bg-secondary">{{ alerts.length }}</span>
-    </div>
-    
-    <div class="alert-container">
-      <div v-for="alert in alerts" :key="alert.id" 
-           class="alert-item mb-2 p-2" 
-           :class="{'border-danger': alert.level === 'Crítico', 'border-warning': alert.level === 'Precaución'}">
-        <div class="d-flex align-items-center">
-          <span class="badge me-2" 
-                :class="{'bg-danger': alert.level === 'Crítico', 'bg-warning text-dark': alert.level === 'Precaución'}">
-            {{ alert.levelText }}
-          </span>
-          <span class="alert-text">{{ alert.text }}</span>
+  <section :class="['alert-panel', darkMode ? 'dark-theme' : 'light-theme']">
+    <header class="panel-header">
+      <h3 class="title">
+        <i class="bi bi-activity me-2"></i> Monitor de Alertas
+      </h3>
+      <span class="badge total">{{ alerts.length }}</span>
+    </header>
+
+    <div class="alert-body">
+      <transition-group name="fade" tag="div">
+        <div
+          v-for="alert in alerts"
+          :key="alert.id"
+          class="alert-box"
+          :class="{
+            'alert-critical': alert.level === 'Crítico',
+            'alert-warning': alert.level === 'Precaución'
+          }"
+        >
+          <i
+            class="bi me-2"
+            :class="{
+              'bi-x-octagon-fill': alert.level === 'Crítico',
+              'bi-exclamation-circle-fill': alert.level === 'Precaución'
+            }"
+          ></i>
+          <span class="alert-text">{{ alert.levelText }} - {{ alert.text }}</span>
         </div>
-      </div>
-      
-      <div v-if="alerts.length === 0" class="text-center py-3 text-muted">
-        No hay alertas activas
+      </transition-group>
+
+      <div v-if="alerts.length === 0" class="empty-message">
+        <i class="bi bi-check-circle me-2"></i> Sistema sin alertas
       </div>
     </div>
   </section>
@@ -30,99 +39,136 @@
 <script>
 export default {
   props: {
-    alerts: { 
-      type: Array, 
+    alerts: {
+    
+      type: Array,
       required: true,
-      default: () => []
+      default: () => [],
     },
     darkMode: {
       type: Boolean,
-      default: false
-    }
-  }
+      default: true,
+    },
+  },
 }
 </script>
 
 <style scoped>
-.alert-list {
-  background: #f9edc9;
+/* === Panel General === */
+.alert-panel {
   border-radius: 1rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+  font-family: "Segoe UI", sans-serif;
+  transition: all 0.3s ease-in-out;
 }
 
-/* Dark mode */
-.dark-mode {
-  background: #2d2724;
-  color: #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-
-.dark-mode .alert-header {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.dark-mode .alert-item {
-  background-color: rgba(30, 30, 46, 0.7);
-  border-color: #3a3a55;
-}
-
-.dark-mode .alert-item.border-danger {
-  border-left-color: #e74c3c;
-}
-
-.dark-mode .alert-item.border-warning {
-  border-left-color: #f1c40f;
-}
-
-.dark-mode .alert-text {
-  color: #e0e0e0;
-}
-
-.alert-header {
+/* === Header === */
+.panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  font-weight: bold;
+  color: #ffffffdd;
 }
 
-.alert-title {
-  font-weight: bold;
-  font-size: 1.1rem;
+.panel-header .title {
   display: flex;
   align-items: center;
+  font-size: 1.3rem;
 }
 
-.alert-item {
-  border-left: 4px solid #ddd;
+.badge.total {
+  background-color: #2c2c2c;
+  color: #00ffff;
+  border: 1px solid #00ffff;
+  padding: 0.4em 0.75em;
   border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  transition: transform 0.2s;
+  font-weight: 600;
 }
 
-.alert-item:hover {
-  transform: translateX(5px);
+/* === Alertas === */
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alert-box {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 5px solid #ccc;
+  transition: transform 0.2s ease, box-shadow 0.3s;
+}
+
+.alert-box:hover {
+  transform: translateX(6px);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+.alert-critical {
+  border-left-color: #ff0033;
+  color: #ffb3b3;
+  background: rgba(255, 0, 51, 0.1);
+}
+
+.alert-warning {
+  border-left-color: #ffc107;
+  color: #fff3cd;
+  background: rgba(255, 193, 7, 0.1);
 }
 
 .alert-text {
-  font-size: 0.95rem;
+  color: inherit;
+}
+
+/* === No alertas === */
+.empty-message {
+  text-align: center;
+  color: #aaa;
+  padding: 1rem;
+  font-style: italic;
+}
+
+/* === Animaciones === */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* === Tema oscuro === */
+.dark-theme {
+  background: linear-gradient(145deg, #0d0d0d, #1b1b1b);
+  color: #e0e0e0;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+}
+
+/* === Tema claro opcional === */
+.light-theme {
+  background: #fdfdfd;
+  color: #222;
+  border: 1px solid #ccc;
 }
 
 @media (max-width: 768px) {
-  .alert-list {
-    padding: 0.75rem;
-    margin: 0.5rem 0;
+  .panel-header .title {
+    font-size: 1.1rem;
   }
-  
-  .alert-title {
-    font-size: 1rem;
-  }
-  
-  .alert-item {
+  .alert-box {
     font-size: 0.9rem;
+    padding: 0.6rem 0.9rem;
   }
 }
-</style> 
+</style>

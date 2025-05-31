@@ -15,44 +15,10 @@
           </div>
           
           <div class="alerts-list">
-            <div class="alert-card critical">
-              <div class="alert-header">
-                <span class="alert-badge critical">Crítico</span>
-                <span class="alert-time">Hace 35 min</span>
-              </div>
-              <div class="alert-title">Temperatura Elevada (72°C) - Tablero Principal</div>
-              <div class="alert-location">Puerto Varas, Tablero de Distribución</div>
-              <div class="alert-actions">
-                <button class="btn-resolve">Marcar resuelta</button>
-                <button class="btn-details">Ver detalles</button>
-              </div>
-            </div>
             
-            <div class="alert-card warning">
-              <div class="alert-header">
-                <span class="alert-badge warning">Precaución</span>
-                <span class="alert-time">Hace 1h 12min</span>
-              </div>
-              <div class="alert-title">Temperatura Elevada (60°C) - Tablero Principal</div>
-              <div class="alert-location">Puerto Varas, Tablero de Distribución</div>
-              <div class="alert-actions">
-                <button class="btn-resolve">Marcar resuelta</button>
-                <button class="btn-details">Ver detalles</button>
-              </div>
-            </div>
+          
+            <AlertList/>
             
-            <div class="alert-card warning">
-              <div class="alert-header">
-                <span class="alert-badge warning">Precaución</span>
-                <span class="alert-time">Hace 2h 45min</span>
-              </div>
-              <div class="alert-title">Vibración anómala - Motor Portón</div>
-              <div class="alert-location">Osorno, Motor Portón Elec.</div>
-              <div class="alert-actions">
-                <button class="btn-resolve">Marcar resuelta</button>
-                <button class="btn-details">Ver detalles</button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -64,12 +30,22 @@
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
 import { useNuxtApp } from '#app'
+import AssetDetail from '../components/AssetDetail.vue'
+import AlertList from '../components/AlertList.vue'
 
 export default {
   name: 'Alertas',
   components: {
     Sidebar,
-    Topbar
+    Topbar,
+    AssetDetail,
+    AlertList
+  },
+   props:{
+    asset: { 
+      type: Object, 
+      required: true 
+    }
   },
 
   data() {
@@ -77,6 +53,7 @@ export default {
       darkMode: false
     }
   },
+ 
 
   mounted() {
     if (process.client) {

@@ -45,7 +45,7 @@ import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
 import AssetDetail from '~/components/AssetDetail.vue'
 import { useNuxtApp } from '#app'
-import { getDatabase, ref, onValue } from "firebase/database"; // Importar módulos de Realtime Database
+import { useAssets } from '~/composables/useAssets'
 
 export default {
   components: {
@@ -100,8 +100,11 @@ export default {
           document.body.classList.remove('dark-mode');
         }
         
-        // Cargar datos de activos desde Firebase
-        this.fetchAssets();
+        const { fetchAssets } = useAssets();
+        fetchAssets((loadedAssets) => {
+          this.assets = loadedAssets;
+          console.log('Datos de Firebase cargados y mapeados (todos los componentes):', this.assets);
+        });
 
       } catch (e) {
         console.error('Error en mounted hook:', e);
@@ -152,118 +155,6 @@ export default {
     
     toggleTheme() {
       this.darkMode = !this.darkMode;
-    },
-
-    // Método para obtener datos de Firebase
-    fetchAssets() {
-      const db = getDatabase();
-      const assetsRef = ref(db, 'components'); // Ahora escucha el nodo 'components'
-
-      // Escuchar cambios en los datos de Firebase
-      onValue(assetsRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedAssets = [];
-        
-        // Transformar los datos de Firebase a la estructura esperada
-        if (data) {
-          // Iterar sobre cada componente (IDs 1, 2, 3, etc.)
-          for (const componentId in data) {
-            const componentData = data[componentId];
-            
-            // Verificar si el componente tiene datos y entradas timestamped
-            if (componentData && componentData.data) {
-              const timestampEntries = componentData.data;
-              const timestamps = Object.keys(timestampEntries).sort(); // Ordenar timestamps para encontrar el último
-              const latestTimestamp = timestamps[timestamps.length - 1]; // Obtener el último timestamp
-              const latestAssetData = timestampEntries[latestTimestamp]; // Obtener la entrada más reciente
-              
-              let displayValue = 'N/A';
-              let assetStatus = 'Desconocido';
-              let assetType = 'general';
-              let valueClass = 'badge-secondary'; // Clase por defecto para el badge
-
-              // Procesar los valores para encontrar el principal a mostrar y determinar el estado/tipo
-              if (latestAssetData.values) {
-                const valuesKeys = Object.keys(latestAssetData.values);
-                if (valuesKeys.length > 0) {
-                  // Tomar el primer valor como valor principal a mostrar
-                  const firstValueKey = valuesKeys[0];
-                  const firstValue = latestAssetData.values[firstValueKey];
-                  
-                  // Intentar añadir la unidad si está presente en el nombre de la clave
-                  const unitMatch = firstValueKey.match(/\((.*)\)/);
-                  const unit = unitMatch ? unitMatch[1] : '';
-                  displayValue = `${firstValue}${unit ? ' ' + unit : ''}`.trim();
-
-                  // Lógica básica para determinar estado, tipo y clase basada en valores y asset_type
-                  const lowerCaseKey = firstValueKey.toLowerCase();
-                  const lowerCaseAssetType = latestAssetData.asset_type ? latestAssetData.asset_type.toLowerCase() : '';
-
-                  if (lowerCaseKey.includes('temperatura') || lowerCaseKey.includes('°c') || lowerCaseAssetType.includes('temperatura')) {
-                    assetType = 'temp';
-                     if (parseFloat(firstValue) > 70) {
-                       valueClass = 'bg-danger';
-                       assetStatus = 'Crítico';
-                     } else if (parseFloat(firstValue) > 60) {
-                       valueClass = 'bg-warning text-dark';
-                       assetStatus = 'Precaución';
-                     } else {
-                        valueClass = 'bg-success';
-                        assetStatus = 'Bueno';
-                     }
-                  } else if (lowerCaseKey.includes('consumo') || lowerCaseKey.includes('kwh') || lowerCaseAssetType.includes('electric') || lowerCaseAssetType.includes('eléctric')) {
-                    assetType = 'electric';
-                     if (parseFloat(firstValue) > 100) {
-                        valueClass = 'bg-warning text-dark';
-                        assetStatus = 'Precaución';
-                     } else {
-                        valueClass = 'bg-success';
-                         assetStatus = 'Bueno';
-                     }
-                  } else if (lowerCaseKey.includes('vibracion') || lowerCaseKey.includes('g') || lowerCaseAssetType.includes('vibracion')) {
-                     assetType = 'vib';
-                     if (parseFloat(firstValue) > 5) {
-                         valueClass = 'bg-danger';
-                         assetStatus = 'Crítico';
-                     } else if (parseFloat(firstValue) > 2) {
-                        valueClass = 'bg-warning text-dark';
-                        assetStatus = 'Precaución';
-                     } else {
-                         valueClass = 'bg-success';
-                         assetStatus = 'Bueno';
-                     }
-                  } else {
-                    // Si no coincide con tipos conocidos, usar un estado/clase genérico
-                     if (firstValue !== null && firstValue !== undefined && firstValue !== '') {
-                         valueClass = 'bg-success'; // Asumir bueno si hay algún valor y tipo desconocido
-                         assetStatus = 'Bueno';
-                     } else {
-                         valueClass = 'badge-secondary';
-                         assetStatus = 'Desconocido';
-                     }
-                  }
-                }
-              }
-              
-              // Añadir el activo a la lista
-              loadedAssets.push({
-                id: componentId, // Usar el ID del componente
-                name: latestAssetData.asset_type || 'Sin Nombre', // Usar asset_type o un valor por defecto
-                value: displayValue, // El valor procesado de la última entrada
-                valueClass: valueClass, // Clase del badge
-                sector: latestAssetData.sector_location || 'Sin Sector', // Usar sector_location o valor por defecto
-                status: assetStatus, // El estado determinado
-                type: assetType // El tipo determinado
-              });
-            }
-          }
-        }
-
-        this.assets = loadedAssets;
-        console.log('Datos de Firebase cargados y mapeados (todos los componentes):', this.assets);
-      }, (error) => {
-        console.error('Error al cargar datos de Firebase:', error);
-      });
     },
 
     handleAssetSelection(assetId) {

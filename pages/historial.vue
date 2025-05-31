@@ -32,66 +32,7 @@
           
           <div class="history-table">
             <table>
-              <thead>
-                <tr>
-                  <th>Fecha/Hora</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
-                  <th>Ubicación</th>
-                  <th>Estado</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>15/07/2023 14:32</td>
-                  <td><span class="tag critical">Alerta</span></td>
-                  <td>Temperatura Elevada (72°C)</td>
-                  <td>Puerto Varas, Tablero Principal</td>
-                  <td><span class="status resolved">Resuelto</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-                <tr>
-                  <td>14/07/2023 10:15</td>
-                  <td><span class="tag warning">Precaución</span></td>
-                  <td>Temperatura Elevada (60°C)</td>
-                  <td>Puerto Varas, Tablero Principal</td>
-                  <td><span class="status resolved">Resuelto</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-                <tr>
-                  <td>12/07/2023 08:45</td>
-                  <td><span class="tag system">Sistema</span></td>
-                  <td>Actualización de firmware</td>
-                  <td>Sistema Central</td>
-                  <td><span class="status success">Exitoso</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-                <tr>
-                  <td>10/07/2023 16:20</td>
-                  <td><span class="tag maintenance">Mantención</span></td>
-                  <td>Limpieza de sensores</td>
-                  <td>Los Muermos, Panel Solar</td>
-                  <td><span class="status success">Completado</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-                <tr>
-                  <td>08/07/2023 11:37</td>
-                  <td><span class="tag warning">Precaución</span></td>
-                  <td>Vibración anómala</td>
-                  <td>Osorno, Motor Portón</td>
-                  <td><span class="status resolved">Resuelto</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-                <tr>
-                  <td>05/07/2023 09:12</td>
-                  <td><span class="tag maintenance">Mantención</span></td>
-                  <td>Reemplazo de batería</td>
-                  <td>Los Muermos, UPS</td>
-                  <td><span class="status success">Completado</span></td>
-                  <td><button class="btn-details">Detalles</button></td>
-                </tr>
-              </tbody>
+              
             </table>
           </div>
         </div>

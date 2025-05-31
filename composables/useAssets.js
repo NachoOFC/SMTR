@@ -47,10 +47,10 @@ export const useAssets = () => {
                     lowerCaseAssetType.includes("temperatura")
                   ) {
                     assetType = "temp";
-                    if (parseFloat(firstValue) > 70) {
+                    if (parseFloat(firstValue) > 40) {
                       valueClass = "bg-danger";
                       assetStatus = "Crítico";
-                    } else if (parseFloat(firstValue) > 60) {
+                    } else if (parseFloat(firstValue) > 30) {
                       valueClass = "bg-warning text-dark";
                       assetStatus = "Precaución";
                     } else {
@@ -65,8 +65,12 @@ export const useAssets = () => {
                   ) {
                     assetType = "electric";
                     if (parseFloat(firstValue) > 100) {
+                      valueClass = "bg-danger";
+                      assetStatus = "Crítico";
+                    } else if (parseFloat(firstValue) > 70){
                       valueClass = "bg-warning text-dark";
                       assetStatus = "Precaución";
+                    
                     } else {
                       valueClass = "bg-success";
                       assetStatus = "Bueno";

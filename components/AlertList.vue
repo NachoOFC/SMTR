@@ -40,7 +40,6 @@
 export default {
   props: {
     alerts: {
-    
       type: Array,
       required: true,
       default: () => [],

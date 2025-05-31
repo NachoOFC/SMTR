@@ -17,7 +17,7 @@
           <div class="alerts-list">
             
           
-            <AlertList/>
+            <AlertList :alerts="criticalAlerts" :darkMode="darkMode" />
             
           </div>
         </div>

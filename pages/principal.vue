@@ -3,7 +3,6 @@
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
-      <AlertList :darkMode="darkMode" />
       
       <div class="container-fluid px-md-4">
         

@@ -3,6 +3,7 @@
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
+      <AlertList :alerts="criticalAlerts" :darkMode="darkMode" />
       <div class="container-fluid px-md-4">
         
         
@@ -140,6 +141,17 @@ export default {
       }
       
       return this.assets
+    },
+
+    criticalAlerts() {
+      return this.assets
+        .filter(asset => asset.status === 'Crítico' || asset.status === 'Precaución')
+        .map(asset => ({
+          id: asset.id,
+          text: `${asset.name}: ${asset.value}`,
+          level: asset.status,
+          levelText: asset.status
+        }));
     }
   },
 

@@ -46,12 +46,6 @@ Build the application for production:
 # npm
 npm run build
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
 # bun
 bun run build
 ```
@@ -65,13 +59,10 @@ npm run preview
 # pnpm
 pnpm preview
 
-# yarn
-yarn preview
-
 # bun
 bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
-este proyecto usa boostrapmpara responsividad y js para conecciones a bd 
+este proyecto usa boostrapmpara responsividad y js para conecciones a bd apk

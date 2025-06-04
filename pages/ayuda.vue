@@ -4,60 +4,55 @@
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
       <div class="container-fluid px-md-4">
-        <div class="construction-container">
-          <h1>Ayuda</h1>
-          <div class="construction-message">
-            <i class="bi bi-tools"></i>
-            <h2>En Construcción</h2>
-            <p>Esta sección está siendo desarrollada. ¡Vuelve pronto!</p>
-          </div>
-        </div>
+        <h1 class="mb-4">AYUDA</h1>
+
+        <p>este sitio web es para.............</p>
       </div>
+      <p>este sitio web es para monitorear los activos</p>
     </div>
-    
   </div>
 </template>
 
 <script>
-import Sidebar from '~/components/Sidebar.vue'
-import Topbar from '~/components/Topbar.vue'
-import { useNuxtApp } from '#app'
+import Sidebar from "~/components/Sidebar.vue";
+import Topbar from "~/components/Topbar.vue";
+import { useNuxtApp } from "#app";
 
 export default {
   components: {
     Sidebar,
-    Topbar
+    Topbar,
   },
 
   data() {
     return {
-      darkMode: false
-    }
+      darkMode: false,
+    };
   },
 
   mounted() {
     if (process.client) {
       const { $isAuthenticated } = useNuxtApp();
       if (!$isAuthenticated.value) {
-        navigateTo('/login', { replace: true });
+        navigateTo("/login", { replace: true });
       }
-      
+
       // Cargar preferencia de tema oscuro y aplicar a body
-      this.darkMode = localStorage.getItem('darkMode') === 'true';
+      this.darkMode = localStorage.getItem("darkMode") === "true";
       if (this.darkMode) {
-        document.body.classList.add('dark-mode');
+        document.body.classList.add("dark-mode");
       } else {
-        document.body.classList.remove('dark-mode');
+        document.body.classList.remove("dark-mode");
       }
     }
   },
-  
+
   methods: {
     toggleTheme() {
       this.darkMode = !this.darkMode;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -86,7 +81,7 @@ export default {
   background: white;
   padding: 3rem;
   border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 2rem;
 }
 
@@ -109,7 +104,7 @@ export default {
 
 .dark-mode .construction-message {
   background: #272741;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode .construction-message i,
@@ -122,10 +117,10 @@ export default {
     margin-left: 0;
     margin-bottom: 60px;
   }
-  
+
   .construction-message {
     margin: 1rem;
     padding: 2rem;
   }
 }
-</style> 
+</style>

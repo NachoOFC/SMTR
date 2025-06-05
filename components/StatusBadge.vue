@@ -1,7 +1,15 @@
 <template>
  <span class="badge d-inline-flex align-items-center" :class="statusClass">
     {{ status }}
-  
+    <img
+      v-if="status === 'Precaución'"
+      src="/warning.gif"
+      background="transparent"
+     speed="1"  
+  style="width: 20px; height: 20px;"  
+  loop  
+  autoplay
+    />
     
   </span>
 </template>

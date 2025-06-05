@@ -2,7 +2,7 @@
   <div :class="['dashboard', darkMode ? 'dark-mode' : '']">
     <Sidebar />
     <div class="main-content">
-      <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
+      <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" @update-search="updateSearch" />
       
       <div class="container-fluid px-md-4">
         <div class="row mt-4" v-if="!selectedAssetId">
@@ -10,7 +10,7 @@
             <div class="filter-section">
               <h3 class="filter-title">Filtrar por estado:</h3>
               <FilterChips :filters="filters" v-model="selectedFilter" />
-              <button v-if="selectedFilter" @click="clearFilter" class="clear-filter btn btn-sm">
+              <button v-if="selectedFilter !== ''" @click="clearFilter" class="clear-filter btn btn-sm">
                 Limpiar filtro
               </button>
             </div>
@@ -22,7 +22,7 @@
             <StatusGraph :assets="assets" :darkMode="darkMode" />
           </div>
         </div>
-        
+
         <div class="row mt-3" v-if="!selectedAssetId">
           <div class="col-12">
             <AssetList :assets="filteredAssets" :darkMode="darkMode" @select-asset="handleAssetSelection" />
@@ -72,7 +72,8 @@ export default {
       ],
       assets: [],
       selectedFilter: '',
-      selectedAssetId: null
+      selectedAssetId: null,
+      searchQuery: ''
     }
   },
 
@@ -80,33 +81,41 @@ export default {
     filteredAssets() {
       console.log('Selected Filter:', this.selectedFilter);
       console.log('All Assets:', this.assets);
-      
-      if (!this.selectedFilter) {
-        return this.assets;
-      }
+      console.log('Search Query:', this.searchQuery);
       
       const removeAccents = (str) => {
+        if (typeof str !== 'string') return '';
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       };
       
-      const filtered = this.assets.filter(asset => {
-        // Normalizar los valores para la comparación
-        const normalizedAssetStatus = removeAccents(asset.status?.trim().toLowerCase());
+      let assetsToFilter = this.assets;
+
+      // Apply status filter
+      if (this.selectedFilter) {
         const normalizedFilter = removeAccents(this.selectedFilter?.trim().toLowerCase());
-        
-        console.log('Comparing:', {
-          originalAssetStatus: asset.status,
-          normalizedAssetStatus,
-          originalFilter: this.selectedFilter,
-          normalizedFilter,
-          matches: normalizedAssetStatus === normalizedFilter
+        assetsToFilter = assetsToFilter.filter(asset => {
+          const normalizedAssetStatus = removeAccents(asset.status?.trim().toLowerCase());
+          return normalizedAssetStatus === normalizedFilter;
         });
-        
-        return normalizedAssetStatus === normalizedFilter;
-      });
+      }
+
+      // Apply search filter
+      if (this.searchQuery) {
+        const normalizedSearchQuery = removeAccents(this.searchQuery.trim().toLowerCase());
+        console.log('Normalized Search Query:', normalizedSearchQuery);
+        assetsToFilter = assetsToFilter.filter(asset => {
+          const normalizedAssetName = removeAccents(asset.name?.trim().toLowerCase());
+          const normalizedAssetId = removeAccents(asset.id?.trim().toLowerCase());
+          
+          console.log('Searching in:', { assetName: asset.name, assetId: asset.id, normalizedAssetName, normalizedAssetId });
+
+          return normalizedAssetName.includes(normalizedSearchQuery) ||
+                 normalizedAssetId.includes(normalizedSearchQuery);
+        });
+      }
       
-      console.log('Filtered Assets:', filtered);
-      return filtered;
+      console.log('Filtered Assets:', assetsToFilter);
+      return assetsToFilter;
     }
   },
 
@@ -157,6 +166,10 @@ export default {
 
     clearAssetSelection() {
       this.selectedAssetId = null;
+    },
+
+    updateSearch(query) {
+      this.searchQuery = query;
     }
   }
 }
@@ -255,4 +268,6 @@ export default {
     padding-right: 0.5rem;
   }
 }
+
+/* Dark mode styles for search */
 </style> 

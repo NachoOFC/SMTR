@@ -5,7 +5,14 @@
         <div class="col">
           <div class="search-section">
             <div class="input-group">
-              <input type="text" placeholder="Buscar..." class="form-control search-input" />
+              <input 
+                type="text" 
+                placeholder="Buscar activo por ID o Nombre..." 
+                class="form-control search-input"
+                v-model="searchQuery" 
+                @input="emitSearch"
+                title="Buscar activo por ID o Nombre"
+              />
               <button class="btn btn-outline-secondary search-btn">
                 <i class="bi bi-search"></i>
               </button>
@@ -42,12 +49,13 @@ export default {
     }
   },
   
-  emits: ['toggle-theme'],
+  emits: ['toggle-theme', 'update-search'],
   
   data() {
     return {
       // Para forzar renderizado
-      refreshKey: 0
+      refreshKey: 0,
+      searchQuery: ''
     }
   },
 
@@ -92,6 +100,11 @@ export default {
       
       localStorage.setItem('darkMode', newState);
       this.$emit('toggle-theme', newState);
+    },
+    
+    // Emit search event
+    emitSearch() {
+      this.$emit('update-search', this.searchQuery);
     },
     
     // Cargar datos del usuario desde localStorage
@@ -194,10 +207,21 @@ export default {
   border-bottom: 1px solid #333;
 }
 
+.dark-mode .search-section .input-group {
+  border: 1px solid #3a3a55;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
 .dark-mode .search-input {
   background: #1a1a2e;
   border-color: #3a3a55;
-  color: #f0f0f0;
+  color: #FFFFFF;
+  border: none;
+}
+
+.dark-mode .search-input::placeholder {
+  color: #cccccc;
 }
 
 .dark-mode .search-btn {

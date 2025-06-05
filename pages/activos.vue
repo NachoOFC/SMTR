@@ -7,17 +7,6 @@
         <h1>Gestión de Activos</h1>
         
         <div class="actions-bar">
-          <div class="search-container">
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              placeholder="Buscar activo..." 
-              class="search-input"
-              @input="handleSearch"
-            />
-            <button class="search-button" @click="handleSearch">🔍</button>
-          </div>
-          
           <div class="filters">
             <select class="filter-select" v-model="selectedType">
               <option value="">Todos los tipos</option>
@@ -101,7 +90,6 @@ export default {
   data() {
     return {
       darkMode: false,
-      searchQuery: '',
       selectedType: '',
       selectedLocation: '',
       selectedStatus: '',
@@ -143,11 +131,6 @@ export default {
   computed: {
     filteredAssets() {
       return this.assets.filter(asset => {
-        const matchesSearch = this.searchQuery === '' || 
-          asset.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          asset.id.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          asset.sector.toLowerCase().includes(this.searchQuery.toLowerCase());
-
         const matchesType = this.selectedType === '' || 
           asset.type.toLowerCase() === this.selectedType.toLowerCase();
 
@@ -157,7 +140,7 @@ export default {
         const matchesStatus = this.selectedStatus === '' || 
           asset.status.toLowerCase() === this.selectedStatus.toLowerCase();
 
-        return matchesSearch && matchesType && matchesLocation && matchesStatus;
+        return matchesType && matchesLocation && matchesStatus;
       });
     }
   },
@@ -175,10 +158,6 @@ export default {
   },
   
   methods: {
-    handleSearch() {
-      // La búsqueda se maneja automáticamente a través del computed property filteredAssets
-    },
-    
     toggleTheme() {
       this.darkMode = !this.darkMode;
       localStorage.setItem('darkMode', this.darkMode);
@@ -213,30 +192,6 @@ h1 {
   align-items: center;
   margin-bottom: 1.5rem;
   gap: 1rem;
-}
-
-.search-container {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-}
-
-.search-button {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 
 .filters {

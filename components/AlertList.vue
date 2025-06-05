@@ -28,6 +28,18 @@
           <span class="alert-text"
             >{{ alert.levelText }} - {{ alert.text }}</span
           >
+          <!-- Add placeholder for more alert details here -->
+          <div class="alert-details">
+              <div><strong>Ubicación:</strong> {{ alert.location }}</div>
+              <div><strong>Valor Actual:</strong> {{ alert.currentValue }}</div>
+              <div><strong>Umbral:</strong> {{ alert.threshold }}</div>
+          </div>
+           <div class="alert-actions">
+                <button class="btn-report">Generar Reporte</button>
+                <button class="btn-resolved">Marcar como Resuelta</button>
+                <button class="btn-pending">Marcar Pendiente</button>
+                <button class="btn-tech">Avisar a Tecnico</button>
+            </div>
         </div>
       </transition-group>
 
@@ -66,6 +78,10 @@ export default {
           text: `${asset.name}: ${asset.value}`,
           level: asset.status,
           levelText: asset.status,
+          // Add placeholder data for location, value, threshold
+          location: asset.sector || 'N/A',
+          currentValue: asset.value || 'N/A',
+          threshold: 'N/A' // You might need to get this from your asset data
         }));
     },
   },
@@ -121,13 +137,13 @@ export default {
 .alert-body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1rem; /* Add space between alert boxes */
 }
 
 .alert-box {
   display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
+  flex-direction: column; /* Stack content vertically */
+  padding: 1rem;
   border-radius: 0.75rem;
   font-weight: 500;
   font-size: 0.95rem;
@@ -137,8 +153,59 @@ export default {
 }
 
 .alert-box:hover {
-  transform: translateX(6px);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  transform: translateX(0); /* Remove hover transform */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); /* Subtle hover shadow */
+}
+
+.alert-box .alert-text {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.alert-details {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #cccccc; /* Lighter text for details in dark mode */
+}
+
+.alert-details div {
+    margin-bottom: 0.3rem;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.alert-actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+
+.btn-report {
+    background-color: #e74c3c; /* Red */
+    color: white;
+}
+
+.btn-resolved {
+    background-color: #2ecc71; /* Green */
+    color: white;
+}
+
+.btn-pending {
+    background-color: #f39c12; /* Orange */
+    color: white;
+}
+
+.btn-tech {
+    background-color: #3498db; /* Blue */
+    color: white;
 }
 
 .alert-critical {
@@ -184,9 +251,53 @@ export default {
 
 /* === Tema claro opcional === */
 .light-theme {
-  background: #fdfdfd;
-  color: #222;
-  border: 1px solid #ccc;
+  background: #ffffff; /* White background for light mode */
+  color: #333; /* Darker text color for light mode */
+  border: 1px solid #e0e0e0; /* Subtle border for light mode */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow for light mode */
+}
+
+.light-theme .panel-header {
+  color: #1e4d92; /* Blue color for header in light mode */
+}
+
+.light-theme .badge.total {
+  background-color: #e0e0e0; /* Light gray background for badge */
+  color: #555; /* Darker text for badge */
+  border-color: #ccc; /* Lighter border for badge */
+}
+
+.light-theme .alert-box {
+  background: #f9f9f9; /* Very light gray background for alert items */
+  border: 1px solid #eee; /* Subtle border for each box in light mode */
+  border-left: 5px solid #ccc; /* Default border color */
+  color: #333; /* Default text color */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05); /* Subtle shadow for each box */
+}
+
+.light-theme .alert-box.alert-critical {
+  border-left-color: #e74c3c; /* Red border for critical */
+  color: #c0392b; /* Darker red text for critical */
+  background: #fdeded; /* Very light red background */
+}
+
+.light-theme .alert-box.alert-warning {
+  border-left-color: #f1c40f; /* Yellow border for warning */
+  color: #b88b00; /* Darker yellow/brown text for warning */
+  background: #fffceb; /* Very light yellow background */
+}
+
+.light-theme .alert-details {
+    color: #555; /* Darker text for details in light mode */
+}
+
+.light-theme .alert-actions button {
+    /* Default button styles for light mode */
+    opacity: 0.9; /* Slightly transparent */
+}
+
+.light-theme .alert-actions button:hover {
+     opacity: 1; /* Fully opaque on hover */
 }
 
 @media (max-width: 768px) {
@@ -197,5 +308,8 @@ export default {
     font-size: 0.9rem;
     padding: 0.6rem 0.9rem;
   }
+   .alert-actions button {
+        width: 100%; /* Full width buttons on small screens */
+    }
 }
 </style>

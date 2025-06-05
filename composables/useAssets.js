@@ -120,6 +120,7 @@ export const useAssets = () => {
           }
         }
 
+        console.log('Processed Assets:', loadedAssets);
         callback(loadedAssets);
       },
       (error) => {

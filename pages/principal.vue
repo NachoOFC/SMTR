@@ -5,17 +5,21 @@
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
       
       <div class="container-fluid px-md-4">
-        
-        
         <div class="row mt-4" v-if="!selectedAssetId">
           <div class="col-12">
             <div class="filter-section">
-              <h3 class="filter-title">Activos según:</h3>
+              <h3 class="filter-title">Filtrar por estado:</h3>
               <FilterChips :filters="filters" v-model="selectedFilter" />
               <button v-if="selectedFilter" @click="clearFilter" class="clear-filter btn btn-sm">
                 Limpiar filtro
               </button>
             </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" v-if="!selectedAssetId">
+          <div class="col-12">
+            <StatusGraph :assets="assets" :darkMode="darkMode" />
           </div>
         </div>
         
@@ -30,7 +34,6 @@
              <AssetDetail :assetId="selectedAssetId" :darkMode="darkMode" @back="clearAssetSelection"/>
            </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -43,6 +46,7 @@ import AlertList from '~/components/AlertList.vue'
 import FilterChips from '~/components/FilterChips.vue'
 import AssetList from '~/components/AssetList.vue'
 import AssetDetail from '~/components/AssetDetail.vue'
+import StatusGraph from '~/components/StatusGraph.vue'
 import { useNuxtApp } from '#app'
 import { useAssets } from '~/composables/useAssets'
 
@@ -53,32 +57,60 @@ export default {
     AlertList,
     FilterChips,
     AssetList,
-    AssetDetail
+    AssetDetail,
+    StatusGraph
   },
 
   data() {
     return {
       darkMode: false,
-     
-
       filters: [
-        { label: 'Lugar', value: 'lugar' },
-        { label: 'T°', value: 'temp' },
-        { label: 'Electric.', value: 'electric' },
-        { label: 'Vibracion', value: 'vib' }
+        { label: 'Todos', value: '' },
+        { label: 'Crítico', value: 'critico' },
+        { label: 'Precaución', value: 'precaucion' },
+        { label: 'Bueno', value: 'bueno' }
       ],
-
-      // Datos de activos ahora inicializados como vacío
-      
       assets: [],
-
-      selectedFilter: null,
+      selectedFilter: '',
       selectedAssetId: null
     }
   },
 
+  computed: {
+    filteredAssets() {
+      console.log('Selected Filter:', this.selectedFilter);
+      console.log('All Assets:', this.assets);
+      
+      if (!this.selectedFilter) {
+        return this.assets;
+      }
+      
+      const removeAccents = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      };
+      
+      const filtered = this.assets.filter(asset => {
+        // Normalizar los valores para la comparación
+        const normalizedAssetStatus = removeAccents(asset.status?.trim().toLowerCase());
+        const normalizedFilter = removeAccents(this.selectedFilter?.trim().toLowerCase());
+        
+        console.log('Comparing:', {
+          originalAssetStatus: asset.status,
+          normalizedAssetStatus,
+          originalFilter: this.selectedFilter,
+          normalizedFilter,
+          matches: normalizedAssetStatus === normalizedFilter
+        });
+        
+        return normalizedAssetStatus === normalizedFilter;
+      });
+      
+      console.log('Filtered Assets:', filtered);
+      return filtered;
+    }
+  },
+
   mounted() {
-    // Verificar autenticación al cargar la página principal
     if (process.client) {
       try {
         console.log('Principal.vue mounted hook started');
@@ -86,12 +118,10 @@ export default {
         const { $isAuthenticated } = useNuxtApp();
         console.log('Is Authenticated:', $isAuthenticated.value);
         if (!$isAuthenticated.value) {
-          // Redirigir a login si no está autenticado
           console.log('User not authenticated, redirecting to login');
           navigateTo('/login', { replace: true });
         }
         
-        // Cargar preferencia de tema oscuro y aplicar a body
         this.darkMode = localStorage.getItem('darkMode') === 'true';
         if (this.darkMode) {
           document.body.classList.add('dark-mode');
@@ -102,7 +132,7 @@ export default {
         const { fetchAssets } = useAssets();
         fetchAssets((loadedAssets) => {
           this.assets = loadedAssets;
-          console.log('Datos de Firebase cargados y mapeados (todos los componentes):', this.assets);
+          console.log('Datos de Firebase cargados y mapeados:', this.assets);
         });
 
       } catch (e) {
@@ -112,44 +142,9 @@ export default {
     console.log('Principal.vue mounted hook finished');
   },
 
-  computed: {
-    filteredAssets() {
-      if (!this.selectedFilter) {
-        return this.assets
-      }
-      
-      // Filtrar por tipo de activo
-      if (this.selectedFilter === 'temp' || 
-          this.selectedFilter === 'electric' || 
-          this.selectedFilter === 'vib') {
-        return this.assets.filter(asset => asset.type === this.selectedFilter)
-      }
-      
-      // Filtrar por lugar (sector)
-      if (this.selectedFilter === 'lugar') {
-        // Agrupar por sector único para este ejemplo
-        const uniqueSectors = [...new Set(this.assets.map(a => a.sector))]
-        return uniqueSectors.map(sector => {
-          const assetsInSector = this.assets.filter(a => a.sector === sector)
-          return {
-            id: `sector-${sector}`,
-            name: `Sector: ${sector}`,
-            value: `${assetsInSector.length} dispositivos`,
-            valueClass: 'badge-info',
-            sector: sector,
-            status: 'Informativo',
-            type: 'lugar'
-          }
-        })
-      }
-      
-      return this.assets
-    }
-  },
-
   methods: {
     clearFilter() {
-      this.selectedFilter = null
+      this.selectedFilter = ''
     },
     
     toggleTheme() {

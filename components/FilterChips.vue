@@ -1,73 +1,76 @@
 <template>
   <div class="filter-chips">
-    <div class="d-flex flex-wrap gap-2">
-      <button 
-        v-for="filter in filters" 
-        :key="filter.value"
-        type="button"
-        :class="['btn btn-sm', { 
-          'btn-primary': modelValue === filter.value, 
-          'btn-outline-secondary': modelValue !== filter.value
-        }]"
-        @click="$emit('update:modelValue', filter.value)">
-        <i v-if="filter.value === 'temp'" class="bi bi-thermometer-high me-1"></i>
-        <i v-else-if="filter.value === 'electric'" class="bi bi-lightning-charge me-1"></i>
-        <i v-else-if="filter.value === 'vib'" class="bi bi-arrow-repeat me-1"></i>
-        <i v-else-if="filter.value === 'lugar'" class="bi bi-geo-alt me-1"></i>
-        {{ filter.label }}
-      </button>
-    </div>
+    <button
+      v-for="filter in filters"
+      :key="filter.value"
+      :class="['filter-chip', { active: modelValue === filter.value }]"
+      @click="$emit('update:modelValue', filter.value)"
+    >
+      {{ filter.label }}
+    </button>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'FilterChips',
   props: {
-    filters: { 
-      type: Array, 
-      required: true 
+    modelValue: {
+      type: String,
+      default: ''
     },
-    modelValue: { 
-      type: [String, null], 
-      default: null 
+    filters: {
+      type: Array,
+      default: () => [
+        { label: 'Todos', value: '' },
+        { label: 'Crítico', value: 'critico' },
+        { label: 'Precaución', value: 'precaucion' },
+        { label: 'Bueno', value: 'bueno' }
+      ]
     }
-  },
-
-  data() {
-    return {
-      // No data por ahora
-    }
-  },
-
-  emits: ['update:modelValue']
+  }
 }
 </script>
 
 <style scoped>
 .filter-chips {
-  margin: 0.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.btn {
+.filter-chip {
+  padding: 0.5rem 1rem;
+  border: none;
   border-radius: 1.5rem;
-  padding: 0.3rem 1rem;
+  background: #f0f0f0;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
   font-size: 0.9rem;
-  transition: all 0.2s;
 }
 
-.btn-primary {
-  background-color: #1e4d92;
-  border-color: #1e4d92;
+.filter-chip:hover {
+  background: #e0e0e0;
 }
 
-.btn-primary:hover, .btn-primary:focus {
-  background-color: #163a6f;
-  border-color: #163a6f;
+.filter-chip.active {
+  background: #1e4d92;
+  color: white;
 }
 
-@media (max-width: 768px) {
-  .filter-chips {
-    width: 100%;
-  }
+/* Dark mode styles */
+:deep(.dark-mode) .filter-chip {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+:deep(.dark-mode) .filter-chip:hover {
+  background: #3d3d3d;
+}
+
+:deep(.dark-mode) .filter-chip.active {
+  background: #3a3a90;
+  color: white;
 }
 </style> 

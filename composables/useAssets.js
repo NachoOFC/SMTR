@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, get, update, push } from "firebase/database";
 
 export const useAssets = () => {
   const fetchAssets = (callback) => {
@@ -129,7 +129,59 @@ export const useAssets = () => {
     );
   };
 
+  const updateAssetStatus = async (assetId, updates) => {
+    try {
+      const db = getDatabase();
+      const assetRef = ref(db, `components/${assetId}`);
+      
+      // Obtener el estado actual del activo
+      const snapshot = await get(assetRef);
+      const currentData = snapshot.val();
+      
+      if (!currentData) {
+        throw new Error('Activo no encontrado');
+      }
+
+      // Crear entrada en el historial
+      const historyRef = ref(db, 'history');
+      const historyEntry = {
+        assetId,
+        assetName: currentData.asset_type || 'Sin Nombre',
+        previousStatus: currentData.status || 'Desconocido',
+        newStatus: updates.status,
+        previousValue: currentData.consumo || 'N/A',
+        newValue: updates.value || currentData.consumo,
+        timestamp: new Date().toISOString(),
+        action: updates.status === 'Bueno' ? 'resuelto' : 'pendiente',
+        location: currentData.sector_location || 'N/A'
+      };
+      
+      // Agregar entrada al historial
+      const historyPush = await push(historyRef, historyEntry);
+      
+      // Actualizar el estado del activo
+      const updateData = {
+        status: updates.status,
+        lastUpdated: new Date().toISOString()
+      };
+
+      // Actualizar el valor de consumo si se proporciona uno nuevo
+      if (updates.value) {
+        updateData.consumo = updates.value;
+      }
+
+      await update(assetRef, updateData);
+      
+      console.log('Historial actualizado:', historyEntry);
+      return true;
+    } catch (error) {
+      console.error('Error updating asset status:', error);
+      throw error;
+    }
+  };
+
   return {
     fetchAssets,
+    updateAssetStatus
   };
 }; 

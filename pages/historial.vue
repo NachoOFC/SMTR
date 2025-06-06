@@ -11,28 +11,64 @@
             <div class="filter-group">
               <label>Fecha:</label>
               <div class="date-inputs">
-                <input type="date" class="date-input" value="2023-07-01" />
+                <input type="date" v-model="startDate" class="date-input" />
                 <span>hasta</span>
-                <input type="date" class="date-input" value="2023-07-15" />
+                <input type="date" v-model="endDate" class="date-input" />
               </div>
             </div>
             
             <div class="filter-group">
-              <label>Tipo:</label>
-              <select class="select-filter">
-                <option value="todos">Todos los eventos</option>
-                <option value="alertas">Alertas</option>
-                <option value="mantenimiento">Mantenimiento</option>
-                <option value="sistema">Sistema</option>
+              <label>Estado:</label>
+              <select v-model="statusFilter" class="select-filter">
+                <option value="todos">Todos los estados</option>
+                <option value="resuelto">Resueltos</option>
+                <option value="pendiente">Pendientes</option>
               </select>
             </div>
             
-            <button class="btn-filter">Filtrar</button>
+            <button class="btn-filter" @click="applyFilters">Filtrar</button>
           </div>
           
           <div class="history-table">
             <table>
-              
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Activo</th>
+                  <th>Estado Anterior</th>
+                  <th>Estado Actual</th>
+                  <th>Valor Anterior</th>
+                  <th>Valor Actual</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="entry in filteredHistory" :key="entry.timestamp">
+                  <td>{{ formatDate(entry.timestamp) }}</td>
+                  <td>{{ entry.assetName }}</td>
+                  <td>
+                    <span class="status-badge" :class="getStatusClass(entry.previousStatus)">
+                      {{ entry.previousStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-badge" :class="getStatusClass(entry.newStatus)">
+                      {{ entry.newStatus }}
+                    </span>
+                  </td>
+                  <td>{{ entry.previousValue }}</td>
+                  <td>{{ entry.newValue }}</td>
+                  <td>
+                    <button 
+                      v-if="entry.newStatus === 'Pendiente' || entry.newStatus === 'Bueno'"
+                      class="btn-action"
+                      @click="returnToAlerts(entry)"
+                    >
+                      Devolver a Alertas
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -44,6 +80,9 @@
 <script>
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
+import { useAssets } from '~/composables/useAssets'
+import { ref, onMounted, computed } from 'vue'
+import { getDatabase, ref as dbRef, onValue, remove, get, update } from 'firebase/database'
 
 export default {
   components: {
@@ -53,7 +92,39 @@ export default {
 
   data() {
     return {
-      darkMode: false
+      darkMode: false,
+      history: [],
+      startDate: '',
+      endDate: '',
+      statusFilter: 'todos'
+    }
+  },
+
+  computed: {
+    filteredHistory() {
+      let filtered = [...this.history];
+      
+      // Filtrar por fecha
+      if (this.startDate) {
+        filtered = filtered.filter(entry => 
+          new Date(entry.timestamp) >= new Date(this.startDate)
+        );
+      }
+      
+      if (this.endDate) {
+        filtered = filtered.filter(entry => 
+          new Date(entry.timestamp) <= new Date(this.endDate + 'T23:59:59')
+        );
+      }
+      
+      // Filtrar por estado
+      if (this.statusFilter !== 'todos') {
+        filtered = filtered.filter(entry => 
+          entry.action === this.statusFilter
+        );
+      }
+      
+      return filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
   },
 
@@ -64,35 +135,75 @@ export default {
         navigateTo('/login', { replace: true });
       }
       
-      // Cargar preferencia de tema oscuro y aplicar a body
       this.darkMode = localStorage.getItem('darkMode') === 'true';
-      
-      this.$nextTick(() => {
-        if (this.darkMode) {
-          document.body.classList.add('dark-mode');
-        } else {
-          document.body.classList.remove('dark-mode');
-        }
-      });
-    }
-  },
-  
-  watch: {
-    darkMode(newVal) {
-      if (process.client) {
-        if (newVal) {
-          document.body.classList.add('dark-mode');
-        } else {
-          document.body.classList.remove('dark-mode');
-        }
-        localStorage.setItem('darkMode', newVal);
-      }
+      this.loadHistory();
     }
   },
   
   methods: {
     toggleTheme(isDarkModeEnabled) {
       this.darkMode = isDarkModeEnabled;
+    },
+
+    async loadHistory() {
+      try {
+        const db = getDatabase();
+        const historyRef = dbRef(db, 'history');
+        
+        onValue(historyRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            // Convertir el objeto en un array y ordenar por fecha
+            this.history = Object.entries(data).map(([key, value]) => ({ ...value, key })).sort((a, b) => 
+              new Date(b.timestamp) - new Date(a.timestamp)
+            );
+          } else {
+            this.history = [];
+          }
+        });
+      } catch (error) {
+        console.error('Error loading history:', error);
+      }
+    },
+
+    formatDate(timestamp) {
+      return new Date(timestamp).toLocaleString();
+    },
+
+    getStatusClass(status) {
+      if (status === 'Crítico') return 'status-critical';
+      if (status === 'Precaución') return 'status-warning';
+      if (status === 'Bueno') return 'status-good';
+      if (status === 'Pendiente') return 'status-pending';
+      return '';
+    },
+
+    async returnToAlerts(entry) {
+      try {
+        const db = getDatabase();
+        const assetRef = dbRef(db, `components/${entry.assetId}`);
+
+        // Update the asset status to the previous status
+        await update(assetRef, {
+          status: entry.previousStatus,
+          consumo: entry.previousValue // Assuming previousValue holds the consumption value
+        });
+
+        // Remove the specific history entry
+        const historyEntryRef = dbRef(db, `history/${entry.key}`);
+        await remove(historyEntryRef);
+        
+        console.log('Asset status updated and history entry removed:', entry);
+        alert('Alerta devuelta correctamente');
+
+      } catch (error) {
+        console.error('Error returning to alerts:', error);
+        alert('Error al devolver a alertas: ' + error.message);
+      }
+    },
+
+    applyFilters() {
+      // Los filtros se aplican automáticamente a través del computed property
     }
   }
 }
@@ -367,5 +478,60 @@ td {
   .filter-group {
     width: 100%;
   }
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-critical {
+  background: #ffe5e5;
+  color: #d32f2f;
+}
+
+.status-warning {
+  background: #fff8e1;
+  color: #f57c00;
+}
+
+.status-good {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-pending {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.btn-action {
+  padding: 0.4rem 0.8rem;
+  background: #1e4d92;
+  color: white;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-action:hover {
+  background: #153a6e;
+}
+
+/* Dark mode styles */
+.dark-mode .status-badge {
+  opacity: 0.9;
+}
+
+.dark-mode .btn-action {
+  background: #3a3a90;
+}
+
+.dark-mode .btn-action:hover {
+  background: #2a2a70;
 }
 </style> 

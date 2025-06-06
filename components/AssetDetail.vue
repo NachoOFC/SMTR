@@ -153,73 +153,335 @@ export default {
     },
 
     async downloadPdf() {
-      if (process.client && jsPDF) { 
-        const doc = new jsPDF();
+  if (process.client && jsPDF) { 
+    const doc = new jsPDF();
+    
+    // Configurar colores (RGB)
+    const primaryColor = [0, 123, 255]; // #007bff
+    const secondaryColor = [108, 117, 125]; // #6c757d
+    const accentColor = [40, 167, 69]; // #28a745
+    const lightGray = [248, 249, 250];
+    const darkGray = [33, 37, 41];
+    
+    try {
+      // === ENCABEZADO MEJORADO ===
+      // Fondo del encabezado
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, 210, 50, 'F');
+      
+      // Logo
+      const logoImg = new Image();
+      logoImg.src = '/image.png';
+      
+      const logoLoadPromise = new Promise((resolve, reject) => {
+        logoImg.onload = () => resolve();
+        logoImg.onerror = (err) => reject(err);
+      });
+      
+      await logoLoadPromise;
+      
+      const logoWidth = 30;
+      const logoHeight = logoImg.naturalHeight * (logoWidth / logoImg.naturalWidth);
+      doc.addImage(logoImg, 'PNG', 15, 12, logoWidth, logoHeight);
+      
+      // Título principal
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('REPORTE DE ACTIVO', 55, 22);
+      
+      // Subtítulo
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Detalles y Valores Registrados del Sistema', 55, 30);
+      
+      // Fecha de generación
+      const currentDate = new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.text(`Generado: ${currentDate}`, 55, 38);
+      
+      // Línea decorativa
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(2);
+      doc.line(15, 45, 195, 45);
+      
+      // === INFORMACIÓN BÁSICA ===
+      let yOffset = 65;
+      
+      // Título de sección
+      doc.setFillColor(...primaryColor);
+      doc.rect(15, yOffset - 8, 180, 15, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INFORMACION DEL ACTIVO', 20, yOffset);
+      
+      yOffset += 15;
+      
+      // Fondo de la sección
+      doc.setFillColor(...lightGray);
+      doc.rect(15, yOffset, 180, 55, 'F');
+      doc.setDrawColor(...primaryColor);
+      doc.setLineWidth(1);
+      doc.rect(15, yOffset, 180, 55, 'S');
+      
+      if (this.assetDetails) {
+        doc.setTextColor(...darkGray);
+        doc.setFontSize(11);
         
-        // Add logo at the top
-        const logoImg = new Image();
+        // Información en formato tabla
+        const leftColumn = 25;
+        const rightColumn = 110;
+        const labelWidth = 35;
         
-        logoImg.src = '/image.png'; 
-
-        // Use a promise to wait for the image to load
-        const logoLoadPromise = new Promise((resolve, reject) => {
-          logoImg.onload = () => resolve();
-          logoImg.onerror = (err) => reject(err);
-        });
-
-        try {
-          await logoLoadPromise;
-          
-          
-          const logoWidth = 30;
-          const logoHeight = logoImg.naturalHeight * (logoWidth / logoImg.naturalWidth);
-          const logoX = 10; // X position
-          const logoY = 10; // Y position
-
-          doc.addImage(logoImg, 'PNG', logoX, logoY, logoWidth, logoHeight);
-
-          // Add title below the logo
-          doc.setFontSize(18);
-          doc.text('Reporte de Detalles del Activo', 50, 30);
-
-          // Add asset details directly using doc.text
-          doc.setFontSize(12);
-          let yOffset = 50; // Start below the title
-
-          if (this.assetDetails) {
-            doc.text(`ID: ${this.assetId}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Nombre: ${this.assetDetails.asset_type || 'Sin Nombre'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Empresa: ${this.assetDetails.company || 'N/A'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Sector: ${this.assetDetails.sector_location || 'N/A'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Última Actualización: ${this.formatTimestamp(this.assetDetails.timestamp) || 'N/A'}`, 10, yOffset);
-            yOffset += 20;
-
-            doc.text('Valores Registrados:', 10, yOffset);
-            yOffset += 10;
-
-            if (this.assetDetails.values) {
-              for (const key in this.assetDetails.values) {
-                doc.text(`- ${key}: ${this.assetDetails.values[key]}`, 15, yOffset);
-                yOffset += 10;
-              }
-            }
-          }
-
-          doc.save(`reporte-activo-${this.assetId}.pdf`);
-
-        } catch (error) {
-          console.error('Error loading logo or generating PDF:', error);
-          alert('Error generating PDF. Please try again.');
-        }
-
-      } else {
-        console.warn('PDF generation is only available on the client side.');
+        // Fila 1
+        doc.setFont('helvetica', 'bold');
+        doc.text('ID:', leftColumn, yOffset + 12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.assetId, leftColumn + labelWidth, yOffset + 12);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Tipo:', rightColumn, yOffset + 12);
+        doc.setFont('helvetica', 'normal');
+        const assetType = this.assetDetails.asset_type || 'Sin Nombre';
+        // Truncar texto si es muy largo
+        const truncatedType = assetType.length > 25 ? assetType.substring(0, 25) + '...' : assetType;
+        doc.text(truncatedType, rightColumn + labelWidth, yOffset + 12);
+        
+        // Fila 2
+        doc.setFont('helvetica', 'bold');
+        doc.text('Empresa:', leftColumn, yOffset + 24);
+        doc.setFont('helvetica', 'normal');
+        const company = this.assetDetails.company || 'N/A';
+        const truncatedCompany = company.length > 20 ? company.substring(0, 20) + '...' : company;
+        doc.text(truncatedCompany, leftColumn + labelWidth, yOffset + 24);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Sector:', rightColumn, yOffset + 24);
+        doc.setFont('helvetica', 'normal');
+        const sector = this.assetDetails.sector_location || 'N/A';
+        const truncatedSector = sector.length > 25 ? sector.substring(0, 25) + '...' : sector;
+        doc.text(truncatedSector, rightColumn + labelWidth, yOffset + 24);
+        
+        // Fila 3 - Fecha (centrada)
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ultima Actualizacion:', leftColumn, yOffset + 36);
+        doc.setFont('helvetica', 'normal');
+        const timestamp = this.formatTimestamp(this.assetDetails.timestamp) || 'N/A';
+        doc.text(timestamp, leftColumn + 60, yOffset + 36);
+        
+        // Líneas separadoras
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+        doc.line(leftColumn, yOffset + 18, rightColumn + 70, yOffset + 18);
+        doc.line(leftColumn, yOffset + 30, rightColumn + 70, yOffset + 30);
+        doc.line(rightColumn - 5, yOffset + 6, rightColumn - 5, yOffset + 30);
       }
+      
+      yOffset += 70;
+      
+      // === VALORES REGISTRADOS ===
+      if (this.assetDetails && this.assetDetails.values) {
+        // Título de la sección
+        doc.setFillColor(...accentColor);
+        doc.rect(15, yOffset - 8, 180, 15, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('VALORES REGISTRADOS', 20, yOffset);
+        
+        yOffset += 15;
+        
+        // Función para obtener símbolo según el tipo de valor
+        const getValueSymbol = (key) => {
+          const keyLower = key.toLowerCase();
+          
+          if (keyLower.includes('temp') || keyLower.includes('temperatura')) return 'TEMP';
+          if (keyLower.includes('hum') || keyLower.includes('humedad')) return 'HUM';
+          if (keyLower.includes('pres') || keyLower.includes('presion')) return 'PRES';
+          if (keyLower.includes('volt') || keyLower.includes('tension')) return 'VOLT';
+          if (keyLower.includes('corr') || keyLower.includes('current')) return 'AMP';
+          if (keyLower.includes('vel') || keyLower.includes('speed')) return 'VEL';
+          if (keyLower.includes('dist') || keyLower.includes('distance')) return 'DIST';
+          if (keyLower.includes('peso') || keyLower.includes('weight')) return 'PESO';
+          if (keyLower.includes('luz') || keyLower.includes('light')) return 'LUZ';
+          if (keyLower.includes('sonido') || keyLower.includes('sound')) return 'AUDIO';
+          if (keyLower.includes('co2') || keyLower.includes('carbon')) return 'CO2';
+          if (keyLower.includes('ph')) return 'PH';
+          if (keyLower.includes('flow') || keyLower.includes('flujo')) return 'FLOW';
+          if (keyLower.includes('level') || keyLower.includes('nivel')) return 'LEVEL';
+          if (keyLower.includes('power') || keyLower.includes('potencia')) return 'PWR';
+          if (keyLower.includes('freq') || keyLower.includes('frecuencia')) return 'FREQ';
+          if (keyLower.includes('rpm')) return 'RPM';
+          if (keyLower.includes('status') || keyLower.includes('estado')) return 'STAT';
+          if (keyLower.includes('alarm') || keyLower.includes('alarma')) return 'ALRM';
+          if (keyLower.includes('error')) return 'ERR';
+          if (keyLower.includes('ok') || keyLower.includes('normal')) return 'OK';
+          
+          return 'DATA';
+        };
+        
+        // Obtener color para el tipo de valor
+        const getValueColor = (key) => {
+          const keyLower = key.toLowerCase();
+          
+          if (keyLower.includes('temp')) return [255, 87, 34]; // Naranja
+          if (keyLower.includes('hum')) return [33, 150, 243]; // Azul
+          if (keyLower.includes('pres')) return [156, 39, 176]; // Púrpura
+          if (keyLower.includes('volt') || keyLower.includes('corr')) return [255, 193, 7]; // Amarillo
+          if (keyLower.includes('error') || keyLower.includes('alarm')) return [244, 67, 54]; // Rojo
+          if (keyLower.includes('ok') || keyLower.includes('normal')) return [76, 175, 80]; // Verde
+          
+          return primaryColor; // Color por defecto
+        };
+        
+        // Organizar valores en grid
+        const values = Object.entries(this.assetDetails.values);
+        const itemsPerRow = 2;
+        const columnWidth = 85;
+        const rowHeight = 35;
+        
+        values.forEach((value, index) => {
+          const [key, val] = value;
+          const row = Math.floor(index / itemsPerRow);
+          const col = index % itemsPerRow;
+          
+          const x = 20 + (col * columnWidth);
+          const y = yOffset + (row * rowHeight);
+          
+          // Verificar si necesitamos nueva página
+          if (y > 250) {
+            doc.addPage();
+            yOffset = 20;
+            const newY = yOffset + (row * rowHeight);
+            
+            // Fondo del elemento
+            doc.setFillColor(255, 255, 255);
+            doc.rect(x - 5, newY - 5, columnWidth - 10, rowHeight - 5, 'F');
+            
+            // Borde del elemento
+            doc.setDrawColor(...getValueColor(key));
+            doc.setLineWidth(1.5);
+            doc.rect(x - 5, newY - 5, columnWidth - 10, rowHeight - 5, 'S');
+            
+            // Símbolo del tipo
+            doc.setFillColor(...getValueColor(key));
+            doc.rect(x - 3, newY - 3, 25, 12, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'bold');
+            doc.text(getValueSymbol(key), x, newY + 5);
+            
+            // Nombre del parámetro
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            const truncatedKey = key.length > 12 ? key.substring(0, 12) + '...' : key;
+            doc.text(truncatedKey, x, newY + 15);
+            
+            // Valor
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...getValueColor(key));
+            const truncatedVal = String(val).length > 10 ? String(val).substring(0, 10) + '...' : String(val);
+            doc.text(truncatedVal, x, newY + 25);
+            
+            return;
+          }
+          
+          // Fondo del elemento
+          doc.setFillColor(255, 255, 255);
+          doc.rect(x - 5, y - 5, columnWidth - 10, rowHeight - 5, 'F');
+          
+          // Borde del elemento
+          doc.setDrawColor(...getValueColor(key));
+          doc.setLineWidth(1.5);
+          doc.rect(x - 5, y - 5, columnWidth - 10, rowHeight - 5, 'S');
+          
+          // Símbolo del tipo
+          doc.setFillColor(...getValueColor(key));
+          doc.rect(x - 3, y - 3, 25, 12, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.text(getValueSymbol(key), x, y + 5);
+          
+          // Nombre del parámetro
+          doc.setTextColor(...darkGray);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          const truncatedKey = key.length > 12 ? key.substring(0, 12) + '...' : key;
+          doc.text(truncatedKey, x, y + 15);
+          
+          // Valor
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...getValueColor(key));
+          const truncatedVal = String(val).length > 10 ? String(val).substring(0, 10) + '...' : String(val);
+          doc.text(truncatedVal, x, y + 25);
+        });
+        
+        // Ajustar yOffset para el siguiente contenido
+        const totalRows = Math.ceil(values.length / itemsPerRow);
+        yOffset += (totalRows * rowHeight) + 15;
+        
+      } else {
+        // No hay valores
+        doc.setFillColor(255, 248, 220);
+        doc.rect(15, yOffset, 180, 25, 'F');
+        doc.setDrawColor(255, 193, 7);
+        doc.setLineWidth(1);
+        doc.rect(15, yOffset, 180, 25, 'S');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(138, 109, 59);
+        doc.setFont('helvetica', 'bold');
+        doc.text('AVISO: No hay valores registrados', 20, yOffset + 10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Los datos apareceran aqui cuando esten disponibles.', 20, yOffset + 18);
+        
+        yOffset += 35;
+      }
+      
+      // === PIE DE PÁGINA ===
+      // Verificar si hay espacio, si no, agregar nueva página
+      if (yOffset > 250) {
+        doc.addPage();
+        yOffset = 20;
+      }
+      
+      // Línea decorativa
+      doc.setDrawColor(...primaryColor);
+      doc.setLineWidth(1);
+      doc.line(15, yOffset + 10, 195, yOffset + 10);
+      
+      // Información del pie
+      doc.setFontSize(8);
+      doc.setTextColor(...secondaryColor);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Sistema de Monitoreo de Activos - Generado automaticamente', 20, yOffset + 20);
+      doc.text(`ID del Reporte: ${this.assetId}-${Date.now()}`, 20, yOffset + 27);
+      doc.text('Documento confidencial - Uso interno unicamente', 20, yOffset + 34);
+      
+      // Guardar el PDF
+      const fileName = `reporte-activo-${this.assetId}-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el PDF. Por favor, intente nuevamente.');
     }
+    
+  } else {
+    console.warn('La generacion de PDF solo esta disponible en el lado del cliente.');
+  }
+}
   }
 }
 </script>

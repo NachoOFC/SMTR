@@ -25,21 +25,17 @@
               'bi-exclamation-circle-fill': alert.level === 'Precaución',
             }"
           ></i>
-          <span class="alert-text"
-            >{{ alert.levelText }} - {{ alert.text }}</span
-          >
-          <!-- Add placeholder for more alert details here -->
+          <span class="alert-text">{{ alert.levelText }} - {{ alert.text }}</span>
           <div class="alert-details">
-              <div><strong>Ubicación:</strong> {{ alert.location }}</div>
-              <div><strong>Valor Actual:</strong> {{ alert.currentValue }}</div>
-              <div><strong>Umbral:</strong> {{ alert.threshold }}</div>
+            <div><strong>Ubicación:</strong> {{ alert.location }}</div>
+            <div><strong>Valor Actual:</strong> {{ alert.currentValue }}</div>
           </div>
-           <div class="alert-actions">
-                <button class="btn-report">Generar Reporte</button>
-                <button class="btn-resolved">Marcar como Resuelta</button>
-                <button class="btn-pending">Marcar Pendiente</button>
-                <button class="btn-tech">Avisar a Tecnico</button>
-            </div>
+          <div class="alert-actions">
+            <button class="btn-report" @click="handleReport(alert)">Generar Reporte</button>
+            <button class="btn-resolved" @click="handleResolve(alert)">Marcar como Resuelta</button>
+            <button class="btn-pending" @click="handlePending(alert)">Marcar Pendiente</button>
+            <button class="btn-tech" @click="handleTech(alert)">Avisar a Tecnico</button>
+          </div>
         </div>
       </transition-group>
 
@@ -47,13 +43,64 @@
         <i class="bi bi-check-circle me-2"></i> Sistema sin alertas
       </div>
     </div>
+
+    <!-- Modales -->
+    <AlertModal
+      :show="showReportModal"
+      title="Generar Reporte"
+      confirmButtonText="Generar"
+      @close="closeModals"
+      @confirm="generateReport"
+    >
+      <p>¿Desea generar un reporte detallado para esta alerta?</p>
+    </AlertModal>
+
+    <AlertModal
+      :show="showResolveModal"
+      title="Marcar como Resuelta"
+      confirmButtonText="Confirmar"
+      @close="closeModals"
+      @confirm="resolveAlert"
+    >
+      <p>¿Está seguro de marcar esta alerta como resuelta?</p>
+      <div class="form-group mt-3">
+        <label>Nuevo valor:</label>
+        <input type="text" v-model="newValue" class="form-control" placeholder="Ingrese el nuevo valor">
+      </div>
+    </AlertModal>
+
+    <AlertModal
+      :show="showPendingModal"
+      title="Marcar como Pendiente"
+      confirmButtonText="Confirmar"
+      @close="closeModals"
+      @confirm="markAsPending"
+    >
+      <p>¿Desea marcar esta alerta como pendiente?</p>
+    </AlertModal>
+
+    <AlertModal
+      :show="showTechModal"
+      title="Avisar a Técnico"
+      confirmButtonText="Enviar"
+      @close="closeModals"
+      @confirm="notifyTech"
+    >
+      <p>¿Desea enviar una notificación al técnico sobre esta alerta?</p>
+    </AlertModal>
   </section>
 </template>
 
 <script>
 import { useAssets } from '~/composables/useAssets';
+import AlertModal from './AlertModal.vue';
+import { ref } from 'vue';
 
 export default {
+  components: {
+    AlertModal
+  },
+
   props: {
     darkMode: {
       type: Boolean,
@@ -64,6 +111,12 @@ export default {
   data() {
     return {
       assets: [],
+      showReportModal: false,
+      showResolveModal: false,
+      showPendingModal: false,
+      showTechModal: false,
+      selectedAlert: null,
+      newValue: ''
     };
   },
 
@@ -78,10 +131,9 @@ export default {
           text: `${asset.name}: ${asset.value}`,
           level: asset.status,
           levelText: asset.status,
-          // Add placeholder data for location, value, threshold
           location: asset.sector || 'N/A',
           currentValue: asset.value || 'N/A',
-          threshold: 'N/A' // You might need to get this from your asset data
+          threshold: 'N/A'
         }));
     },
   },
@@ -92,6 +144,95 @@ export default {
       this.assets = loadedAssets;
     });
   },
+
+  methods: {
+    handleReport(alert) {
+      this.selectedAlert = alert;
+      this.showReportModal = true;
+    },
+
+    handleResolve(alert) {
+      this.selectedAlert = alert;
+      this.showResolveModal = true;
+    },
+
+    handlePending(alert) {
+      this.selectedAlert = alert;
+      this.showPendingModal = true;
+    },
+
+    handleTech(alert) {
+      this.selectedAlert = alert;
+      this.showTechModal = true;
+    },
+
+    closeModals() {
+      this.showReportModal = false;
+      this.showResolveModal = false;
+      this.showPendingModal = false;
+      this.showTechModal = false;
+      this.selectedAlert = null;
+      this.newValue = '';
+    },
+
+    async generateReport() {
+      // Implementar generación de reporte
+      console.log('Generando reporte para:', this.selectedAlert);
+    },
+
+    async resolveAlert() {
+      if (!this.newValue) {
+        alert('Por favor ingrese un nuevo valor');
+        return;
+      }
+
+      try {
+        const { updateAssetStatus } = useAssets();
+        await updateAssetStatus(this.selectedAlert.id, {
+          status: 'Bueno',
+          value: this.newValue
+        });
+        
+        // Actualizar la lista de activos
+        const { fetchAssets } = useAssets();
+        fetchAssets((loadedAssets) => {
+          this.assets = loadedAssets;
+        });
+
+        // Mostrar mensaje de éxito
+        alert('Alerta marcada como resuelta correctamente');
+      } catch (error) {
+        console.error('Error al resolver alerta:', error);
+        alert('Error al resolver la alerta: ' + error.message);
+      }
+    },
+
+    async markAsPending() {
+      try {
+        const { updateAssetStatus } = useAssets();
+        await updateAssetStatus(this.selectedAlert.id, {
+          status: 'Pendiente'
+        });
+        
+        // Actualizar la lista de activos
+        const { fetchAssets } = useAssets();
+        fetchAssets((loadedAssets) => {
+          this.assets = loadedAssets;
+        });
+
+        // Mostrar mensaje de éxito
+        alert('Alerta marcada como pendiente correctamente');
+      } catch (error) {
+        console.error('Error al marcar como pendiente:', error);
+        alert('Error al marcar como pendiente: ' + error.message);
+      }
+    },
+
+    async notifyTech() {
+      // Implementar notificación al técnico
+      console.log('Notificando al técnico sobre:', this.selectedAlert);
+    }
+  }
 };
 </script>
 

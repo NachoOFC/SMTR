@@ -18,6 +18,11 @@
             </NuxtLink>
           </li>
           <li>
+            <NuxtLink to="/graficos" class="menu-link" active-class="active">
+              <i class="bi bi-graph-up-arrow icon"></i> Gráficos
+            </NuxtLink>
+          </li>
+          <li>
             <NuxtLink to="/historial" class="menu-link" active-class="active">
               <i class="bi bi-clipboard-data-fill icon"></i> Historial
             </NuxtLink>
@@ -58,6 +63,14 @@
           >
             <i class="bi bi-bell-fill"></i>
             <span>Alertas</span>
+          </NuxtLink>
+          <NuxtLink
+            to="/graficos"
+            class="navbar-mobile-item"
+            active-class="active"
+          >
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Gráficos</span>
           </NuxtLink>
           <NuxtLink
             to="/historial"

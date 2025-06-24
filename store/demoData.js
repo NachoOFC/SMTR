@@ -62,7 +62,7 @@ const initialReportes = [
   {
     id: 1,
     asunto: 'Ayuda',
-    descripcion: 'La temperatura arde como tu hermana',
+    descripcion: 'La temperatura esta muy elevada',
     alerta: { ...initialHistorial[0] },
     fecha: '2025-06-24T12:00:00Z'
   },

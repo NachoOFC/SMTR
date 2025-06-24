@@ -7,11 +7,11 @@
             <div class="input-group">
               <input 
                 type="text" 
-                placeholder="Buscar activo por ID o Nombre..." 
+                placeholder="Buscar activo por Nombre..." 
                 class="form-control search-input"
                 v-model="searchQuery" 
                 @input="emitSearch"
-                title="Buscar activo por ID o Nombre"
+                title="Buscar activo por Nombre"
               />
               <button class="btn btn-outline-secondary search-btn">
                 <i class="bi bi-search"></i>

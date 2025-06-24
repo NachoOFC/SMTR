@@ -35,10 +35,10 @@
               <div><strong>Umbral:</strong> {{ alert.threshold }}</div>
           </div>
            <div class="alert-actions">
-                <button class="btn-report">Generar Reporte</button>
-                <button class="btn-resolved">Marcar como Resuelta</button>
-                <button class="btn-pending">Marcar Pendiente</button>
-                <button class="btn-tech">Avisar a Tecnico</button>
+                <button class="btn-report" @click="openReportModal(alert)">Generar Reporte</button>
+                <button class="btn-resolved" @click="openResolvedModal(alert)">Marcar como Resuelta</button>
+                <button class="btn-pending" @click="openPendingModal(alert)">Marcar Pendiente</button>
+                <button v-if="demoData.modo === 'usuario'" class="btn-tech" @click="openTechModal(alert)">Avisar a Tecnico</button>
             </div>
         </div>
       </transition-group>
@@ -48,10 +48,94 @@
       </div>
     </div>
   </section>
+
+  <!-- Modales Bootstrap -->
+  <div v-if="showReportModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Generar Reporte</h5>
+          <button type="button" class="btn-close" @click="closeModals"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Asunto</label>
+            <input v-model="reportSubject" type="text" class="form-control" placeholder="Asunto del reporte">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea v-model="reportDescription" class="form-control" rows="3" placeholder="Describe el problema"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeModals">Cancelar</button>
+          <button type="button" class="btn btn-danger" @click="enviarReporte" :disabled="!reportSubject || !reportDescription">Enviar Reporte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showResolvedModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Resuelto</h5>
+          <button type="button" class="btn-close" @click="closeModals"></button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro que deseas marcar esta alerta como <b>Resuelta</b>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeModals">Cancelar</button>
+          <button type="button" class="btn btn-success" @click="confirmarResuelta">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showPendingModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Pendiente</h5>
+          <button type="button" class="btn-close" @click="closeModals"></button>
+        </div>
+        <div class="modal-body">
+          ¿Deseas marcar esta alerta como <b>Pendiente</b>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeModals">Cancelar</button>
+          <button type="button" class="btn btn-warning" @click="confirmarPendiente">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="showTechModal" class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Avisar a Técnico</h5>
+          <button type="button" class="btn-close" @click="closeModals"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Mensaje para el técnico</label>
+            <textarea v-model="techMessage" class="form-control" rows="3" placeholder="Escribe un mensaje"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="closeModals">Cancelar</button>
+          <button type="button" class="btn btn-primary" @click="avisarTecnico">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { useAssets } from '~/composables/useAssets';
+import { demoData } from '~/store/demoData.js';
 
 export default {
   props: {
@@ -64,6 +148,15 @@ export default {
   data() {
     return {
       assets: [],
+      showReportModal: false,
+      showResolvedModal: false,
+      showPendingModal: false,
+      showTechModal: false,
+      selectedAlert: null,
+      reportSubject: '',
+      reportDescription: '',
+      techMessage: '',
+      demoData
     };
   },
 
@@ -78,10 +171,9 @@ export default {
           text: `${asset.name}: ${asset.value}`,
           level: asset.status,
           levelText: asset.status,
-          // Add placeholder data for location, value, threshold
           location: asset.sector || 'N/A',
           currentValue: asset.value || 'N/A',
-          threshold: 'N/A' // You might need to get this from your asset data
+          threshold: 'N/A'
         }));
     },
   },
@@ -91,6 +183,80 @@ export default {
     fetchAssets((loadedAssets) => {
       this.assets = loadedAssets;
     });
+  },
+
+  methods: {
+    openReportModal(alert) {
+      this.selectedAlert = alert;
+      this.reportSubject = '';
+      this.reportDescription = '';
+      this.showReportModal = true;
+    },
+    openResolvedModal(alert) {
+      this.selectedAlert = alert;
+      this.showResolvedModal = true;
+    },
+    openPendingModal(alert) {
+      this.selectedAlert = alert;
+      this.showPendingModal = true;
+    },
+    openTechModal(alert) {
+      this.selectedAlert = alert;
+      this.techMessage = '';
+      this.showTechModal = true;
+    },
+    closeModals() {
+      this.showReportModal = false;
+      this.showResolvedModal = false;
+      this.showPendingModal = false;
+      this.showTechModal = false;
+      this.selectedAlert = null;
+    },
+    confirmarResuelta() {
+      if (this.selectedAlert) {
+        demoData.historial.push({
+          ...this.selectedAlert,
+          estado: 'Resuelta',
+          fecha: new Date().toISOString()
+        });
+      }
+      this.closeModals();
+    },
+    confirmarPendiente() {
+      if (this.selectedAlert) {
+        demoData.historial.push({
+          ...this.selectedAlert,
+          estado: 'Pendiente',
+          fecha: new Date().toISOString()
+        });
+      }
+      this.closeModals();
+    },
+    enviarReporte() {
+      if (this.selectedAlert && this.reportSubject && this.reportDescription) {
+        demoData.reportes.push({
+          id: Date.now(),
+          asunto: this.reportSubject,
+          descripcion: this.reportDescription,
+          alerta: this.selectedAlert,
+          fecha: new Date().toISOString()
+        });
+      }
+      this.closeModals();
+    },
+    avisarTecnico() {
+      // Simulación: guardar solicitud y cerrar modal
+      if (this.selectedAlert && this.techMessage) {
+        demoData.solicitudes.push({
+          id: Date.now(),
+          mensaje: this.techMessage,
+          alerta: this.selectedAlert,
+          fecha: new Date().toISOString(),
+          estado: 'Pendiente'
+        });
+      }
+      this.closeModals();
+    }
   },
 };
 </script>

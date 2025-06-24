@@ -4,6 +4,10 @@
     <aside class="sidebar d-none d-md-flex">
       <div class="logo-section">
         <img src="/SMTR.png" alt="Logo SMTR" class="sidebar-logo" />
+        <button class="btn btn-sm btn-outline-info ms-2 toggle-modo-btn" @click="toggleModo">
+          <i :class="demoData.modo === 'usuario' ? 'bi bi-person-fill' : 'bi bi-tools'" style="font-size:1.2em;"></i>
+          <span class="d-none d-lg-inline ms-1">{{ demoData.modo === 'usuario' ? 'Usuario' : 'Técnico' }}</span>
+        </button>
       </div>
       <nav class="menu">
         <ul>
@@ -18,13 +22,23 @@
             </NuxtLink>
           </li>
           <li>
+            <NuxtLink to="/historial" class="menu-link" active-class="active">
+              <i class="bi bi-clipboard-data-fill icon"></i> Historial
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/reportes" class="menu-link" active-class="active">
+              <i class="bi bi-file-earmark-text-fill icon"></i> Reportes
+            </NuxtLink>
+          </li>
+           <li>
             <NuxtLink to="/graficos" class="menu-link" active-class="active">
               <i class="bi bi-graph-up-arrow icon"></i> Gráficos
             </NuxtLink>
           </li>
-          <li>
-            <NuxtLink to="/historial" class="menu-link" active-class="active">
-              <i class="bi bi-clipboard-data-fill icon"></i> Historial
+          <li v-if="demoData.modo === 'tecnico'">
+            <NuxtLink to="/solicitudes" class="menu-link" active-class="active">
+              <i class="bi bi-inbox-fill icon"></i> Solicitudes
             </NuxtLink>
           </li>
           <!-- <li>
@@ -120,11 +134,13 @@
 
 <script>
 import { getAuth, signOut } from "firebase/auth";
+import { demoData, toggleModo } from '~/store/demoData.js';
 
 export default {
   data() {
     return {
       userName: "",
+      demoData
     };
   },
 
@@ -144,6 +160,9 @@ export default {
           // An error happened.
         });
     },
+    toggleModo() {
+      toggleModo();
+    }
   },
 };
 </script>
@@ -267,5 +286,23 @@ export default {
   .sidebar {
     transform: translateX(-100%);
   }
+}
+
+.toggle-modo-btn {
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #fff;
+  color: #1e4d92;
+  border: 1px solid #1e4d92;
+  transition: background 0.2s, color 0.2s;
+}
+.toggle-modo-btn:hover {
+  background: #1e4d92;
+  color: #fff;
 }
 </style>

@@ -63,35 +63,35 @@ const initialReportes = [
     id: 1,
     asunto: 'Ayuda',
     descripcion: 'La temperatura arde como tu hermana',
-    alerta: initialHistorial[0],
+    alerta: { ...initialHistorial[0] },
     fecha: '2025-06-24T12:00:00Z'
   },
   {
     id: 2,
     asunto: 'Motor hace ruidos raros',
     descripcion: 'Suena como si estuviera rapeando Eminem',
-    alerta: initialHistorial[1],
+    alerta: { ...initialHistorial[1] },
     fecha: '2025-06-23T09:35:00Z'
   },
   {
     id: 3,
     asunto: 'Vibración extrema',
     descripcion: 'Parece que va a despegar la torre, Houston tenemos un problema',
-    alerta: initialHistorial[2],
+    alerta: { ...initialHistorial[2] },
     fecha: '2025-06-22T15:50:00Z'
   },
   {
     id: 4,
     asunto: 'Panel solar flojo',
     descripcion: 'No genera ni para cargar el celular',
-    alerta: initialHistorial[3],
+    alerta: { ...initialHistorial[3] },
     fecha: '2025-06-21T12:10:00Z'
   },
   {
     id: 5,
     asunto: '¡Sin café!',
     descripcion: 'Emergencia real, la productividad caerá a cero',
-    alerta: initialHistorial[4],
+    alerta: { ...initialHistorial[4] },
     fecha: '2025-06-20T08:05:00Z'
   }
 ];

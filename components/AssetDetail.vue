@@ -153,73 +153,241 @@ export default {
     },
 
     async downloadPdf() {
-      if (process.client && jsPDF) { 
-        const doc = new jsPDF();
+  if (process.client && jsPDF) { 
+    const doc = new jsPDF();
+    
+    // Configuración de colores corporativos
+    const primaryColor = [0, 123, 255]; // Azul principal
+    const secondaryColor = [108, 117, 125]; // Gris
+    const accentColor = [40, 167, 69]; // Verde
+    const backgroundColor = [248, 249, 250]; // Gris claro
+    
+    // Función helper para agregar rectángulos con color
+    const addColoredRect = (x, y, width, height, color, opacity = 1) => {
+      doc.setFillColor(color[0], color[1], color[2]);
+     
+      doc.rect(x, y, width, height, 'F');
+    };
+    
+    // Header con fondo azul
+    addColoredRect(0, 0, 210, 40, primaryColor);
+    
+    // Agregar logo
+    const logoImg = new Image();
+    logoImg.src = '/image.png';
+    
+    const logoLoadPromise = new Promise((resolve, reject) => {
+      logoImg.onload = () => resolve();
+      logoImg.onerror = (err) => reject(err);
+    });
+
+    try {
+      await logoLoadPromise;
+      
+      // Logo en el header
+      const logoWidth = 25;
+      const logoHeight = logoImg.naturalHeight * (logoWidth / logoImg.naturalWidth);
+      doc.addImage(logoImg, 'PNG', 15, 8, logoWidth, logoHeight);
+
+      // Título principal en blanco
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('REPORTE DE ACTIVO', 50, 20);
+      
+      // Subtítulo
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Detalles Técnicos y Operacionales', 50, 30);
+      
+      // Fecha y hora de generación
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('es-ES', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const timeStr = now.toLocaleTimeString('es-ES');
+      doc.setFontSize(10);
+      doc.text(`Generado el ${dateStr} a las ${timeStr}`, 15, 52);
+
+      // Resetear color de texto
+      doc.setTextColor(0, 0, 0);
+      
+      let yOffset = 70;
+
+      if (this.assetDetails) {
+        // Sección de información básica con fondo
+        addColoredRect(10, yOffset - 5, 190, 50, backgroundColor, 0.3);
         
-        // Add logo at the top
-        const logoImg = new Image();
+        // Título de sección
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.text(' INFORMACIÓN BÁSICA', 15, yOffset + 5);
         
-        logoImg.src = '/image.png'; 
+        // Línea divisoria
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.setLineWidth(0.5);
+        doc.line(15, yOffset + 8, 195, yOffset + 8);
+        
+        yOffset += 18;
+        
+        // Información en dos columnas
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        
+        // Columna izquierda
+        doc.text('ID del Activo:', 15, yOffset);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.assetId, 50, yOffset);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Empresa:', 15, yOffset + 8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.assetDetails.company || 'N/A', 50, yOffset + 8);
+        
+        // Columna derecha
+        doc.setFont('helvetica', 'bold');
+        doc.text('Tipo de Activo:', 110, yOffset);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.assetDetails.asset_type || 'Sin Nombre', 150, yOffset);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Sector:', 110, yOffset + 8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.assetDetails.sector_location || 'N/A', 150, yOffset + 8);
+        
+        yOffset += 25;
+        
+        // Última actualización destacada
+        addColoredRect(10, yOffset - 3, 190, 15, accentColor, 0.1);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+        doc.text('🕒 Última Actualización:', 15, yOffset + 5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(this.formatTimestamp(this.assetDetails.timestamp) || 'N/A', 70, yOffset + 5);
+        
+        yOffset += 25;
 
-        // Use a promise to wait for the image to load
-        const logoLoadPromise = new Promise((resolve, reject) => {
-          logoImg.onload = () => resolve();
-          logoImg.onerror = (err) => reject(err);
-        });
-
-        try {
-          await logoLoadPromise;
+        // Sección de valores registrados
+        if (this.assetDetails.values && Object.keys(this.assetDetails.values).length > 0) {
+          // Título de sección
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+          doc.text('VALORES REGISTRADOS', 15, yOffset);
           
+          // Línea divisoria
+          doc.line(15, yOffset + 3, 195, yOffset + 3);
           
-          const logoWidth = 30;
-          const logoHeight = logoImg.naturalHeight * (logoWidth / logoImg.naturalWidth);
-          const logoX = 10; // X position
-          const logoY = 10; // Y position
-
-          doc.addImage(logoImg, 'PNG', logoX, logoY, logoWidth, logoHeight);
-
-          // Add title below the logo
-          doc.setFontSize(18);
-          doc.text('Reporte de Detalles del Activo', 50, 30);
-
-          // Add asset details directly using doc.text
+          yOffset += 15;
+          
+          // Crear tabla con los valores
+          const values = this.assetDetails.values;
+          const entries = Object.entries(values);
+          
+          // Headers de la tabla
+          addColoredRect(15, yOffset - 5, 180, 12, primaryColor, 0.8);
+          doc.setTextColor(255, 255, 255);
           doc.setFontSize(12);
-          let yOffset = 50; // Start below the title
-
-          if (this.assetDetails) {
-            doc.text(`ID: ${this.assetId}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Nombre: ${this.assetDetails.asset_type || 'Sin Nombre'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Empresa: ${this.assetDetails.company || 'N/A'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Sector: ${this.assetDetails.sector_location || 'N/A'}`, 10, yOffset);
-            yOffset += 10;
-            doc.text(`Última Actualización: ${this.formatTimestamp(this.assetDetails.timestamp) || 'N/A'}`, 10, yOffset);
-            yOffset += 20;
-
-            doc.text('Valores Registrados:', 10, yOffset);
-            yOffset += 10;
-
-            if (this.assetDetails.values) {
-              for (const key in this.assetDetails.values) {
-                doc.text(`- ${key}: ${this.assetDetails.values[key]}`, 15, yOffset);
-                yOffset += 10;
-              }
+          doc.setFont('helvetica', 'bold');
+          doc.text('PARAMETRO', 20, yOffset + 2);
+          doc.text('VALOR', 120, yOffset + 2);
+          
+          yOffset += 12;
+          
+          // Filas de la tabla
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(10);
+          
+          entries.forEach((entry, index) => {
+            const [key, value] = entry;
+            const isEven = index % 2 === 0;
+            
+            // Fondo alternado para las filas
+            if (isEven) {
+              addColoredRect(15, yOffset - 3, 180, 10, backgroundColor, 0.5);
             }
-          }
-
-          doc.save(`reporte-activo-${this.assetId}.pdf`);
-
-        } catch (error) {
-          console.error('Error loading logo or generating PDF:', error);
-          alert('Error generating PDF. Please try again.');
+            
+            // Texto de la fila
+            doc.setFont('helvetica', 'bold');
+            doc.text(key, 20, yOffset + 3);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(value), 120, yOffset + 3);
+            
+            yOffset += 10;
+            
+            // Verificar si necesitamos una nueva página
+            if (yOffset > 250) {
+              doc.addPage();
+              yOffset = 20;
+            }
+          });
+          
+          // Borde de la tabla
+          doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+          doc.setLineWidth(0.5);
+          doc.rect(15, yOffset - (entries.length * 10) - 12, 180, (entries.length * 10) + 12);
+          
+        } else {
+          // No hay valores
+          doc.setFontSize(16);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+          doc.text('📊 VALORES REGISTRADOS', 15, yOffset);
+          doc.line(15, yOffset + 3, 195, yOffset + 3);
+          
+          yOffset += 20;
+          addColoredRect(15, yOffset - 5, 180, 20, [255, 193, 7], 0.2);
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'italic');
+          doc.text('⚠️ No hay valores registrados para este activo', 20, yOffset + 5);
         }
+        
+        // Footer
+        const pageHeight = doc.internal.pageSize.height;
+        addColoredRect(0, pageHeight - 20, 210, 20, backgroundColor, 0.8);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Este reporte ha sido generado automáticamente por el sistema de gestión de activos', 15, pageHeight - 10);
+        doc.text(`Página 1 de 1`, 170, pageHeight - 10);
+        
+        // Marca de agua sutil
+        
+        doc.setFontSize(60);
+        doc.setTextColor(128, 128, 128);
+        
+      }
 
+      // Guardar el PDF con nombre mejorado
+      const fileName = `Reporte_Activo_${this.assetId}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+    } catch (error) {
+      console.error('Error loading logo or generating PDF:', error);
+      
+      // Mostrar mensaje de error más elegante
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al generar PDF',
+          text: 'Hubo un problema al generar el reporte. Por favor, inténtalo de nuevo.',
+          confirmButtonColor: '#007bff'
+        });
       } else {
-        console.warn('PDF generation is only available on the client side.');
+        alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
       }
     }
+
+  } else {
+    console.warn('PDF generation is only available on the client side.');
+  }
+}
   }
 }
 </script>

@@ -53,7 +53,7 @@
           <i class="bi bi-question-circle-fill icon"></i> Ayuda
         </NuxtLink>
         <a href="#" @click.prevent="logout" class="logout menu-link">
-          <i class="bi bi-box-arrow-left icon"></i> Log Out
+          <i class="bi bi-box-arrow-left icon"></i> SALIR
         </a>
       </div>
     </aside>
@@ -121,7 +121,7 @@
               </li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="logout"
-                  ><i class="bi bi-box-arrow-left me-2"></i> Log Out</a
+                  ><i class="bi bi-box-arrow-left me-2"></i> SALIR</a
                 >
               </li>
             </ul>

@@ -105,12 +105,13 @@ export default {
         console.log('Normalized Search Query:', normalizedSearchQuery);
         assetsToFilter = assetsToFilter.filter(asset => {
           const normalizedAssetName = removeAccents(asset.name?.trim().toLowerCase());
-          const normalizedAssetId = removeAccents(asset.id?.trim().toLowerCase());
+         // const normalizedAssetId = removeAccents(asset.id?.trim().toLowerCase());
           
-          console.log('Searching in:', { assetName: asset.name, assetId: asset.id, normalizedAssetName, normalizedAssetId });
+          console.log('Searching in:', { assetName: asset.name, normalizedAssetName });
 
-          return normalizedAssetName.includes(normalizedSearchQuery) ||
-                 normalizedAssetId.includes(normalizedSearchQuery);
+          return normalizedAssetName.includes(normalizedSearchQuery)
+          // ||
+            // normalizedAssetId.includes(normalizedSearchQuery);
         });
       }
       

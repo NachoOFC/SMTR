@@ -4,51 +4,80 @@
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
       <div class="container-fluid px-md-4">
-        <h1 class="mb-4">AYUDA</h1>
+       <h1 class="mb-4 text-2xl font-bold tracking-wide text-[#1e4d92] dark:text-[#4d92e0] flex items-center gap-2">
+        🛠️ Centro de Ayuda
+      </h1>
+
 
         <div class="help-section">
-          <h2>Acerca de este sitio</h2>
-          <p>Este sitio web está diseñado para el monitoreo en tiempo real de activos, proporcionando información clave sobre su estado y rendimiento. Aquí encontrarás herramientas para visualizar el estado general de los activos, filtrar información específica y acceder a detalles.</p>
+          <h2>ℹ️ Acerca de este sitio</h2>
+          <p>Este sistema web está diseñado para el monitoreo y gestión de activos en tiempo real. Permite supervisar el estado, rendimiento e historial de cada activo, así como generar alertas, reportes y solicitudes técnicas según el perfil de usuario.</p>
         </div>
 
         <div class="help-section mt-4">
-          <h2>Navegación</h2>
-          <p>Utiliza la barra lateral de navegación para acceder a las diferentes secciones de la aplicación:</p>
+          <h2>🧭 Navegación</h2>
+          <p>Utiliza la barra lateral para moverte entre las distintas secciones del sistema. Las opciones disponibles pueden variar según tu perfil (usuario o técnico).</p>
+
+          <h3 class="mt-3">🔹 Usuario</h3>
           <ul>
-            <li><strong>Principal:</strong> Vista general del estado de los activos y acceso a la lista principal.</li>
-            <li><strong>Activos:</strong> Gestión detallada y listado completo de todos los activos.</li>
-            <li><strong>Alertas:</strong> Consulta el historial de alertas generadas.</li>
-            <li><strong>Historial:</strong> Revisa eventos y registros pasados de los activos.</li>
-            <li><strong>Ayuda:</strong> Esta página.</li>
+            <li><strong>Principal:</strong> Vista general del estado de todos los activos.</li>
+            <li><strong>Activos:</strong> Consulta y gestión del inventario de activos disponibles.</li>
+            <li><strong>Alertas:</strong> Historial de eventos o condiciones críticas detectadas.</li>
+            <li><strong>Gráficos:</strong> Visualización de datos operativos y de rendimiento.</li>
+            <li><strong>Historial:</strong> Registro cronológico de eventos asociados a los activos.</li>
+            <li><strong>Reportes:</strong> Generación y descarga de informes del sistema.</li>
+            <li><strong>Ayuda:</strong> Acceso a esta sección de asistencia.</li>
+          </ul>
+
+          <h3 class="mt-3">🔧 Técnico</h3>
+          <ul>
+            <li><strong>Principal:</strong> Panel con indicadores clave del estado técnico de los activos.</li>
+            <li><strong>Activos:</strong> Gestión avanzada de características, mantenimiento y configuración.</li>
+            <li><strong>Alertas:</strong> Supervisión técnica de condiciones de riesgo o fallos detectados.</li>
+            <li><strong>Gráficos:</strong> Análisis visual detallado de datos técnicos y operativos.</li>
+            <li><strong>Historial:</strong> Seguimiento completo de cambios, alertas y eventos.</li>
+            <li><strong>Reportes:</strong> Acceso a reportes técnicos para toma de decisiones.</li>
+            <li><strong>Solicitudes:</strong> Administración de solicitudes de mantenimiento u otras acciones técnicas.</li>
+            <li><strong>Ayuda:</strong> Esta misma sección de soporte.</li>
           </ul>
         </div>
 
         <div class="help-section mt-4">
-          <h2>Página Principal</h2>
-          <p>En la página principal encontrarás:</p>
+          <h2>📊 Página Principal</h2>
+          <p>La página principal ofrece una visión rápida del estado actual de los activos, permitiendo un acceso directo a los elementos más relevantes.</p>
+
+          <h3 class="mt-3">🔹 Usuario</h3>
           <ul>
-            <li><strong>Filtro de Estado:</strong> Utiliza los botones para filtrar los activos por su estado (Crítico, Precaución, Bueno).</li>
-            <li><strong>Gráfico de Estado:</strong> Una representación visual del número de activos en cada estado.</li>
-            <li><strong>Buscador:</strong> Busca activos específicos por su ID o nombre en la barra superior.</li>
-            <li><strong>Lista de Activos:</strong> Un listado de los activos, filtrado según tus selecciones. Haz clic en un activo para ver sus detalles.</li>
+            <li><strong>Filtro de Estado:</strong> Permite visualizar activos en estado Crítico, Precaución o Bueno.</li>
+            <li><strong>Gráfico de Estado:</strong> Representación visual de la cantidad de activos en cada categoría.</li>
+            <li><strong>Buscador:</strong> Localiza activos por nombre o código desde la barra superior.</li>
+            <li><strong>Lista de Activos:</strong> Muestra los activos filtrados con acceso directo a sus detalles.</li>
+          </ul>
+
+          <h3 class="mt-3">🔧 Técnico</h3>
+          <ul>
+            <li><strong>Filtro de Estado:</strong> Igual que el usuario, pero enfocado a priorizar acciones técnicas.</li>
+            <li><strong>Gráfico de Estado:</strong> Herramienta clave para evaluar el estado general del sistema.</li>
+            <li><strong>Buscador:</strong> Permite buscar activos por parámetros técnicos o ID específicos.</li>
+            <li><strong>Lista de Activos:</strong> Acceso rápido a información detallada y funciones de mantenimiento.</li>
           </ul>
         </div>
 
         <div class="help-section mt-4">
-          <h2>Modo Oscuro</h2>
-          <p>Puedes alternar entre el modo claro y oscuro haciendo clic en el icono de sol/luna en la esquina superior derecha.</p>
+          <h2>🌓 Modo Oscuro</h2>
+          <p>Puedes cambiar entre modo claro y oscuro utilizando el ícono del sol/luna ubicado en la esquina superior derecha. El sistema recordará tu preferencia para futuras visitas.</p>
         </div>
 
         <div class="help-section mt-4">
-          <h2>Soporte</h2>
-          <p>Si necesitas asistencia adicional, por favor contacta al administrador del sistema.</p>
+          <h2>🆘 Soporte</h2>
+          <p>Si necesitas ayuda adicional o presentas problemas técnicos, contacta al administrador del sistema o al equipo de soporte según corresponda.</p>
         </div>
-
       </div>
-      
     </div>
   </div>
 </template>
+
+
 
 <script>
 import Sidebar from "~/components/Sidebar.vue";

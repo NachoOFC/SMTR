@@ -143,10 +143,9 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
-.profile-name {
+.dark-mode .profile-name {
   font-weight: 600;
-  color: var(--text-color, #222);
+  color: #f0f0f0;
 }
 
 .arrow {

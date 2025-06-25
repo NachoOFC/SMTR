@@ -27,9 +27,9 @@
               <i class="bi bi-clipboard-data-fill icon"></i> Historial
             </NuxtLink>
           </li>
-          <!-- <li>
+           <!-- <li>
             <NuxtLink to="/activos" class="menu-link" active-class="active">
-              <i class="bi bi-hdd-rack-fill icon"></i> Activos
+              <i class="bi bi-hdd-rack-fill icon"></i> Perfil
             </NuxtLink>
           </li> -->
         </ul>

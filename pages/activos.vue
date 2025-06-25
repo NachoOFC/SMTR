@@ -1,398 +1,277 @@
 <template>
-  <div :class="['dashboard', darkMode ? 'dark-mode' : '']">
+  <div :class="['dashboard']">
     <Sidebar />
     <div class="main-content">
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" />
+
       <div class="container-fluid px-md-4">
-        <h1>Gestión de Activos</h1>
-        
-        <div class="actions-bar">
-          <div class="filters">
-            <select class="filter-select" v-model="selectedType">
-              <option value="">Todos los tipos</option>
-              <option value="electric">Eléctricos</option>
-              <option value="temp">Temperatura</option>
-              <option value="vib">Vibración</option>
-              <option value="security">Seguridad</option>
-            </select>
-            
-            <select class="filter-select" v-model="selectedLocation">
-              <option value="">Todas las ubicaciones</option>
-              <option value="puerto-varas">Puerto Varas</option>
-              <option value="osorno">Osorno</option>
-              <option value="los-muermos">Los Muermos</option>
-            </select>
-            
-            <select class="filter-select" v-model="selectedStatus">
-              <option value="">Todos los estados</option>
-              <option value="bueno">Bueno</option>
-              <option value="precaucion">Precaución</option>
-              <option value="critico">Crítico</option>
-            </select>
-          </div>
-          
-          <button class="btn-add">
-            <span>+</span> Nuevo Activo
-          </button>
+        <h1>Mi Perfil</h1>
+
+        <div v-if="loading" class="asset-card">Cargando perfil...</div>
+
+        <div v-else class="asset-card" style="max-width: 600px;">
+          <form @submit.prevent="guardarCambios">
+            <div class="mb-4">
+              <label class="detail-label">Nombre:</label>
+              <input v-model="usuario.nombre" class="input" />
+            </div>
+
+            <div class="mb-4">
+              <label class="detail-label">Correo:</label>
+              <input :value="usuario.email" class="input input-disabled" disabled />
+            </div>
+
+            <div class="mb-4">
+              <label class="detail-label">Teléfono:</label>
+              <input v-model="usuario.telefono" class="input" />
+            </div>
+
+            <div class="mb-4">
+              <label class="detail-label">Dirección:</label>
+              <input v-model="usuario.direccion" class="input" />
+            </div>
+
+            <div class="mb-4">
+              <label class="detail-label">Rol:</label>
+              <input :value="usuario.rol || 'Usuario'" class="input input-disabled" disabled />
+            </div>
+
+            <div class="asset-actions mt-4">
+              <button type="submit" class="btn-asset">Guardar Cambios</button>
+              <button type="button" class="btn-asset" @click="cerrarSesion">Cerrar Sesión</button>
+            </div>
+          </form>
         </div>
-        
-        <div class="assets-grid">
-          <div v-for="asset in filteredAssets" :key="asset.id" class="asset-card">
-            <div class="asset-header">
-              <span class="asset-title">{{ asset.name }}</span>
-              <span :class="['asset-badge', asset.valueClass]">{{ asset.value }}</span>
-            </div>
-            <div class="asset-details">
-              <div class="detail-item">
-                <span class="detail-label">ID:</span>
-                <span>{{ asset.id }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Sector:</span>
-                <span>{{ asset.sector }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Tipo:</span>
-                <span>{{ asset.type }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Estado:</span>
-                <span :class="['status', asset.status.toLowerCase()]">{{ asset.status }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Última revisión:</span>
-                <span>{{ asset.lastReview }}</span>
-              </div>
-            </div>
-            <div class="asset-actions">
-              <button class="btn-asset">Ver detalles</button>
-              <button class="btn-asset">Editar</button>
-            </div>
-          </div>
-        </div>
-        
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Sidebar from '~/components/Sidebar.vue'
 import Topbar from '~/components/Topbar.vue'
-import { useNuxtApp } from '#app'
 
-export default {
-  components: {
-    Sidebar,
-    Topbar
-  },
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth'
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore'
 
-  data() {
-    return {
-      darkMode: false,
-      selectedType: '',
-      selectedLocation: '',
-      selectedStatus: '',
-      assets: [
-        {
-          id: 'BAT-001',
-          name: 'Batería UPS',
-          value: '90%',
-          valueClass: 'green',
-          sector: 'Los Muermos',
-          type: 'Eléctrico',
-          status: 'Bueno',
-          lastReview: '12/07/2023'
-        },
-        {
-          id: 'SENS-004',
-          name: 'Sensor Puerta Principal',
-          value: 'Activo',
-          valueClass: 'green',
-          sector: 'Los Muermos',
-          type: 'Seguridad',
-          status: 'Bueno',
-          lastReview: '14/07/2023'
-        },
-        {
-          id: 'HUM-006',
-          name: 'Sensor de Humedad',
-          value: '45%',
-          valueClass: 'blue',
-          sector: 'Osorno',
-          type: 'Ambiental',
-          status: 'Bueno',
-          lastReview: '08/07/2023'
-        }
-      ]
-    }
-  },
+const darkMode = ref(false)
+const loading = ref(true)
+const usuario = ref({
+  nombre: '',
+  email: '',
+  telefono: '',
+  direccion: '',
+  rol: '',
+})
 
-  computed: {
-    filteredAssets() {
-      return this.assets.filter(asset => {
-        const matchesType = this.selectedType === '' || 
-          asset.type.toLowerCase() === this.selectedType.toLowerCase();
+const auth = getAuth()
+const db = getFirestore()
+const router = useRouter()
 
-        const matchesLocation = this.selectedLocation === '' || 
-          asset.sector.toLowerCase() === this.selectedLocation.toLowerCase();
-
-        const matchesStatus = this.selectedStatus === '' || 
-          asset.status.toLowerCase() === this.selectedStatus.toLowerCase();
-
-        return matchesType && matchesLocation && matchesStatus;
-      });
-    }
-  },
-
-  mounted() {
-    if (process.client) {
-      const { $isAuthenticated } = useNuxtApp();
-      if (!$isAuthenticated.value) {
-        navigateTo('/login', { replace: true });
-      }
-      
-      // Cargar preferencia de tema oscuro
-      this.darkMode = localStorage.getItem('darkMode') === 'true';
-    }
-  },
-  
-  methods: {
-    toggleTheme() {
-      this.darkMode = !this.darkMode;
-      localStorage.setItem('darkMode', this.darkMode);
-    }
+// Aplica o quita clase dark-mode en <body>
+function toggleBodyDarkClass() {
+  if (darkMode.value) {
+    document.body.classList.add('dark-mode')
+  } else {
+    document.body.classList.remove('dark-mode')
   }
+}
+
+onMounted(() => {
+  darkMode.value = localStorage.getItem('darkMode') === 'true'
+  toggleBodyDarkClass()
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return router.push('/login')
+
+    try {
+      const docRef = doc(db, 'usuarios', user.uid)
+      const docSnap = await getDoc(docRef)
+
+      usuario.value.email = user.email
+
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        usuario.value = {
+          ...data,
+          email: user.email,
+          nombre: data.nombre || user.displayName || '',
+        }
+      } else {
+        usuario.value.nombre = user.displayName || ''
+      }
+    } catch (error) {
+      console.error('Error al cargar datos:', error)
+    } finally {
+      loading.value = false
+    }
+  })
+})
+
+function toggleTheme() {
+  darkMode.value = !darkMode.value
+  localStorage.setItem('darkMode', darkMode.value)
+  toggleBodyDarkClass()
+}
+
+async function guardarCambios() {
+  const user = auth.currentUser
+  if (!user) return
+
+  try {
+    await updateDoc(doc(db, 'usuarios', user.uid), {
+      nombre: usuario.value.nombre,
+      telefono: usuario.value.telefono,
+      direccion: usuario.value.direccion,
+    })
+    alert('Perfil actualizado correctamente.')
+  } catch (e) {
+    alert('Error al guardar cambios: ' + e.message)
+  }
+}
+
+function cerrarSesion() {
+  signOut(auth).then(() => router.push('/login'))
 }
 </script>
 
 <style scoped>
 .dashboard {
-  display: flex;
+  position: relative;
   min-height: 100vh;
-  background: #f7f7fb;
+  background: var(--background-color, #f5f5f5);
+  display: flex;
 }
 
+/* Sidebar fijo y encima */
+.dashboard > *:first-child {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100vh;
+  background-color: #1e4d92;
+  z-index: 1000;
+  overflow-y: auto;
+  color: white;
+}
+
+/* Contenido principal con margen para que no quede debajo del sidebar */
 .main-content {
+  margin-left: 250px;
   flex: 1;
-  margin-left: 220px;
-  transition: all 0.3s ease;
+  overflow-y: auto;
+  padding: 1rem 2rem;
+  background-color: var(--background-color, white);
+  min-height: 100vh;
 }
 
-h1 {
-  color: inherit;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
+.container-fluid {
+  padding-top: 1rem;
 }
 
-.actions-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 5px;
+  background-color: white;
+  color: black;
 }
 
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.filter-select {
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.btn-add {
-  background: #1e4d92;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-add span {
-  font-size: 1.2rem;
-}
-
-.assets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.asset-card {
-  background: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-  padding: 1.2rem;
-  transition: transform 0.2s;
-}
-
-.asset-card:hover {
-  transform: translateY(-5px);
-}
-
-.asset-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.asset-title {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-.asset-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-weight: bold;
-  font-size: 0.9rem;
-  color: white;
-}
-
-.asset-badge.green {
-  background: #27ae60;
-}
-
-.asset-badge.red {
-  background: #e74c3c;
-}
-
-.asset-badge.yellow {
-  background: #f1c40f;
-  color: #333;
-}
-
-.asset-badge.blue {
-  background: #3498db;
-}
-
-.asset-details {
-  margin-bottom: 1rem;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.detail-label {
+.input-disabled {
+  background-color: #eee;
   color: #777;
-  font-weight: 500;
 }
 
-.status {
-  font-weight: 600;
-}
-
-.status.good {
-  color: #27ae60;
-}
-
-.status.warning {
-  color: #f1c40f;
-}
-
-.status.critical {
-  color: #e74c3c;
-}
-
-.asset-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.btn-asset {
-  flex: 1;
-  margin: 0 0.25rem;
-  padding: 0.5rem;
-  background: #f5f5f5;
-  border: none;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-asset:hover {
-  background: #eaeaea;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 2rem 0;
-}
-
-.page-btn {
-  width: 2.2rem;
-  height: 2.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 0.4rem;
-  cursor: pointer;
-}
-
-.page-btn.active {
-  background: #1e4d92;
-  border-color: #1e4d92;
-  color: white;
-}
-
-/* Estilos para modo oscuro */
-.dark-mode {
-  background: #121212;
-  color: #f0f0f0;
-}
-
-.dark-mode input, .dark-mode select, .dark-mode button {
+.dark-mode .input {
   background-color: #272741;
   color: #f0f0f0;
   border-color: #3a3a55;
 }
 
-.dark-mode .asset-card {
-  background-color: #272741;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+.dark-mode .input-disabled {
+  background-color: #333353;
+  color: #aaa;
 }
 
-.dark-mode .asset-title, 
+.detail-label {
+  font-weight: 600;
+  color: #555;
+  display: block;
+  margin-bottom: 4px;
+}
+
 .dark-mode .detail-label {
   color: #f0f0f0;
 }
 
-.dark-mode .detail-item span:not(.detail-label):not(.status) {
-  color: #c0c0d0;
+.asset-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
 }
 
-@media (max-width: 767.98px) {
-  .main-content {
-    margin-left: 0;
-    margin-bottom: 60px;
-  }
-  
-  .container-fluid {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
+.dark-mode .asset-card {
+  background: #272741;
+  color: #f0f0f0;
 }
-</style> 
+
+.asset-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-asset {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #1e4d92;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-asset:hover {
+  background-color: #163a6f;
+}
+</style>
+
+<style>
+/* Estilos globales para modo oscuro en <body> */
+body.dark-mode {
+  background-color: #1f1f2e;
+  color: #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode input {
+  background-color: #272741;
+  color: #f0f0f0;
+  border-color: #3a3a55;
+}
+
+body.dark-mode .input-disabled {
+  background-color: #333353;
+  color: #aaa;
+}
+
+body.dark-mode .detail-label {
+  color: #f0f0f0;
+}
+
+body.dark-mode .asset-card {
+  background: #272741;
+  color: #f0f0f0;
+}
+</style>

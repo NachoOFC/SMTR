@@ -21,6 +21,7 @@
         </div>
         <div class="col-auto d-flex align-items-center">
           <!-- Botón de modo oscuro -->
+           <PerfilDropdownSimple/>
           <button 
             class="theme-toggle-btn btn"
             @click="toggleTheme"
@@ -36,10 +37,10 @@
 
 <script>
 import { getAuth, signOut } from 'firebase/auth'
-
+import PerfilDropdownSimple from '~/components/PerfilDropdownSimple.vue'
 export default {
   components: {
-    // REMOVED: AvatarSelector
+    PerfilDropdownSimple
   },
   
   props: {

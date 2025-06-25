@@ -41,9 +41,9 @@
               <i class="bi bi-inbox-fill icon"></i> Solicitudes
             </NuxtLink>
           </li>
-          <!-- <li>
+           <!-- <li>
             <NuxtLink to="/activos" class="menu-link" active-class="active">
-              <i class="bi bi-hdd-rack-fill icon"></i> Activos
+              <i class="bi bi-hdd-rack-fill icon"></i> Perfil
             </NuxtLink>
           </li> -->
         </ul>

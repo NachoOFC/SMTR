@@ -26,10 +26,15 @@
     <transition name="fade">
       <div v-if="menuOpen" class="dropdown-card">
         <div class="card-content">
-          <p><strong>Rol:</strong> {{ usuario.nombre || 'Tecnico' }}</p>
+          <p><strong>Nombre:</strong> {{ usuario.nombre || 'Sin nombre' }}</p>
+          <p><strong>Rol:</strong> {{ demoData.modo === 'usuario' ? 'Usuario' : 'Técnico' }}</p>
           <p><strong>Email:</strong> {{ usuario.email }}</p>
 
           <button @click="editarPerfil" class="btn">Editar Perfil</button>
+          <button @click="toggleModo" class="btn btn-modo-toggle-green">
+            <i :class="demoData.modo === 'usuario' ? 'bi bi-person-fill' : 'bi bi-tools'" style="font-size:1.2em;"></i>
+            {{ demoData.modo === 'usuario' ? 'Cambiar a Técnico' : 'Cambiar a Usuario' }}
+          </button>
           <button @click="cerrarSesion" class="btn btn-logout">Cerrar Sesión</button>
         </div>
       </div>
@@ -146,6 +151,7 @@ import {
   sendEmailVerification  // ← AGREGADA ESTA IMPORTACIÓN
 } from 'firebase/auth'
 import { useNuxtApp } from '#app'
+import { demoData, toggleModo } from '~/store/demoData.js';
 
 export default {
   name: 'PerfilDropdownSimple',
@@ -375,6 +381,8 @@ export default {
       guardarCambios,
       enviarVerificacionEmail,
       usuarioInicial,
+      demoData,
+      toggleModo
     }
   },
 }
@@ -770,5 +778,16 @@ export default {
   .btn-save {
     width: 100%;
   }
+}
+
+.btn-modo-toggle-green {
+  background-color: #27ae60;
+  color: #fff;
+  margin-top: 10px;
+}
+
+.btn-modo-toggle-green:hover {
+  background-color: #229954;
+  color: #fff;
 }
 </style>

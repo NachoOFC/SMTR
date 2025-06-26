@@ -166,14 +166,34 @@ h1 {
   color: #f0f0f0;
 }
 .dark-mode .history-table {
-  background: #23234a;
+  background: #23243a;
   color: #f0f0f0;
 }
+.dark-mode .table {
+  background: #23243a;
+  color: #f0f0f0;
+  border-color: #2d2e4a;
+}
 .dark-mode .table thead th {
-  background: linear-gradient(90deg, #23234a 0%, #3a3a90 100%);
+  background: #2d2e4a;
   color: #fff;
+  border-bottom: 1.5px solid #3a3a55;
+}
+.dark-mode .table td {
+  background: #23243a;
+  color: #f0f0f0;
+  border-color: #2d2e4a;
 }
 .dark-mode .table-hover tbody tr:hover {
-  background: #23234a;
+  background: #28294a;
+}
+.dark-mode .btn,
+.dark-mode .btn-outline-success {
+  color: #fff;
+  border-color: #3a3a55;
+}
+.dark-mode .btn:hover {
+  background: #3a3a90;
+  color: #fff;
 }
 </style> 

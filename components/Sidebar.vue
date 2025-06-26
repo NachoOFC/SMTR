@@ -4,10 +4,6 @@
     <aside class="sidebar d-none d-md-flex">
       <div class="logo-section">
         <img src="/SMTR.png" alt="Logo SMTR" class="sidebar-logo" />
-        <button class="btn btn-sm btn-outline-info ms-2 toggle-modo-btn" @click="toggleModo">
-          <i :class="demoData.modo === 'usuario' ? 'bi bi-person-fill' : 'bi bi-tools'" style="font-size:1.2em;"></i>
-          <span class="d-none d-lg-inline ms-1">{{ demoData.modo === 'usuario' ? 'Usuario' : 'Técnico' }}</span>
-        </button>
       </div>
       <nav class="menu">
         <ul>
@@ -286,23 +282,5 @@ export default {
   .sidebar {
     transform: translateX(-100%);
   }
-}
-
-.toggle-modo-btn {
-  margin-left: 0.5rem;
-  font-size: 0.95rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 0.7rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  background: #fff;
-  color: #1e4d92;
-  border: 1px solid #1e4d92;
-  transition: background 0.2s, color 0.2s;
-}
-.toggle-modo-btn:hover {
-  background: #1e4d92;
-  color: #fff;
 }
 </style>

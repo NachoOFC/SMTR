@@ -21,7 +21,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       databaseURL:
         "https://innovacionproyectos-e79cc-default-rtdb.firebaseio.com",
       projectId: "innovacionproyectos-e79cc",
-      storageBucket: "innovacionproyectos-e79cc.firebasestorage.app",
+      storageBucket: "innovacionproyectos-e79cc.appspot.com",
       messagingSenderId: "1097049027759",
       appId: "1:1097049027759:web:accc9e1dd07fefaf45905a",
     };

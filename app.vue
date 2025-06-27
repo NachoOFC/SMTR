@@ -1,9 +1,11 @@
 <script>
 import GlobalLoader from '~/components/GlobalLoader.vue'
+import NotificationToast from '~/components/NotificationToast.vue'
 
 export default {
   components: {
-    GlobalLoader
+    GlobalLoader,
+    NotificationToast
   },
   middleware: ['auth'],
   data() {
@@ -25,6 +27,7 @@ export default {
 <template>
   <div>
     <GlobalLoader :isLoading="isLoading" />
+    <NotificationToast />
     <NuxtPage />
   </div>
 </template>

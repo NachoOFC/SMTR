@@ -32,7 +32,7 @@
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Técnico</label>
-                  <input v-model="form.tecnico" type="text" class="form-control" placeholder="Ej: Elsa Pito" required />
+                  <input v-model="form.tecnico" type="text" class="form-control" placeholder="Ej: Cristiano Ronaldo" required />
                 </div>
                 <div class="mb-3">
                   <label class="form-label">Observaciones</label>

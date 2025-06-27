@@ -20,6 +20,16 @@
           </div>
         </div>
         <div class="col-auto d-flex align-items-center">
+          <!-- Botón de descarga de la app -->
+          <a
+            href="/SMTR.apk"
+            download
+            class="btn btn-apk me-2"
+            title="Descarga nuestra app para Android"
+            style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; background: linear-gradient(90deg, #27ae60, #2ecc71); color: #fff; border-radius: 8px; padding: 0.5rem 1rem; box-shadow: 0 2px 8px rgba(39,174,96,0.08); border: none;"
+          >
+            <i class="bi bi-phone"></i> Descarga nuestra app
+          </a>
           <!-- Botón de modo oscuro -->
            <PerfilDropdownSimple/>
           <button 

@@ -136,6 +136,7 @@
 <script>
 import { useAssets } from '~/composables/useAssets';
 import { demoData } from '~/store/demoData.js';
+import { useNotifications } from '~/composables/useNotifications.js';
 
 export default {
   props: {
@@ -186,6 +187,7 @@ export default {
   },
 
   methods: {
+    ...useNotifications(),
     openReportModal(alert) {
       this.selectedAlert = alert;
       this.reportSubject = '';
@@ -219,6 +221,7 @@ export default {
           estado: 'Resuelta',
           fecha: new Date().toISOString()
         });
+        this.success('Alerta marcada como resuelta');
       }
       this.closeModals();
     },
@@ -229,6 +232,7 @@ export default {
           estado: 'Pendiente',
           fecha: new Date().toISOString()
         });
+        this.info('Alerta marcada como pendiente');
       }
       this.closeModals();
     },
@@ -241,6 +245,7 @@ export default {
           alerta: this.selectedAlert,
           fecha: new Date().toISOString()
         });
+        this.success('Reporte enviado correctamente');
       }
       this.closeModals();
     },
@@ -254,6 +259,7 @@ export default {
           fecha: new Date().toISOString(),
           estado: 'Pendiente'
         });
+        this.success('Técnico avisado correctamente');
       }
       this.closeModals();
     }

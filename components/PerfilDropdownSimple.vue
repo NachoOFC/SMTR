@@ -2,7 +2,7 @@
   <div class="profile-dropdown" ref="dropdown">
     <div class="profile-trigger" @click="toggleMenu">
       <img
-        :src="usuario.photoURL || '/perfil.png'"
+        :src="tempPhotoURL || usuario.photoURL || '/perfil.png'"
         alt="Avatar"
         class="avatar"
       />
@@ -26,6 +26,17 @@
     <transition name="fade">
       <div v-if="menuOpen" class="dropdown-card">
         <div class="card-content">
+          <div class="profile-photo-section">
+            <img :src="tempPhotoURL || usuario.photoURL || '/perfil.png'" alt="Avatar" class="avatar avatar-large" />
+            <input ref="fileInput" type="file" accept="image/*" class="d-none" @change="onFileChange" />
+            <button class="btn btn-photo-upload" @click="triggerFileInput" :disabled="uploadingPhoto">
+              {{ uploadingPhoto ? 'Procesando...' : 'Cambiar Foto' }}
+            </button>
+            <div v-if="uploadError" class="error-message mt-1">{{ uploadError }}</div>
+            <div v-if="tempPhotoURL" class="temp-photo-notice">
+              <small>⚠️ Foto temporal - se mantiene durante la navegación</small>
+            </div>
+          </div>
           <p><strong>Nombre:</strong> {{ usuario.nombre || 'Sin nombre' }}</p>
           <p><strong>Rol:</strong> {{ demoData.modo === 'usuario' ? 'Usuario' : 'Técnico' }}</p>
           <p><strong>Email:</strong> {{ usuario.email }}</p>
@@ -148,15 +159,18 @@ import {
   updatePassword, 
   reauthenticateWithCredential, 
   EmailAuthProvider,
-  sendEmailVerification  // ← AGREGADA ESTA IMPORTACIÓN
+  sendEmailVerification,
+  updateProfile
 } from 'firebase/auth'
 import { useNuxtApp } from '#app'
-import { demoData, toggleModo } from '~/store/demoData.js';
+import { demoData, toggleModo } from '~/store/demoData.js'
+import { useTempPhoto } from '~/composables/useTempPhoto.js'
 
 export default {
   name: 'PerfilDropdownSimple',
   setup() {
-    const { $auth } = useNuxtApp()
+    const { $auth, $db } = useNuxtApp()
+    const { tempPhotoURL, setTempPhoto } = useTempPhoto()
 
     const menuOpen = ref(false)
     const mostrarFormulario = ref(false)
@@ -180,6 +194,52 @@ export default {
       nuevaPassword: '',
       passwordActual: ''
     })
+
+    // Carga temporal de foto de perfil
+    const uploadingPhoto = ref(false)
+    const uploadError = ref('')
+    const fileInput = ref(null)
+
+    const onFileChange = async (e) => {
+      uploadError.value = ''
+      const file = e.target.files[0]
+      if (!file) return
+      
+      uploadingPhoto.value = true
+      
+      try {
+        // Validar el archivo
+        if (!file.type.startsWith('image/')) {
+          throw new Error('Por favor selecciona un archivo de imagen válido')
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB máximo
+          throw new Error('La imagen debe ser menor a 5MB')
+        }
+
+        // Convertir la imagen a base64
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          setTempPhoto(event.target.result)
+          uploadingPhoto.value = false
+          uploadError.value = ''
+        }
+        
+        reader.onerror = () => {
+          throw new Error('Error al procesar la imagen')
+        }
+        
+        reader.readAsDataURL(file)
+        
+      } catch (err) {
+        uploadError.value = err.message || 'Error al procesar la imagen'
+        uploadingPhoto.value = false
+      }
+    }
+
+    const triggerFileInput = () => {
+      if (fileInput.value) fileInput.value.click()
+    }
 
     onMounted(() => {
       const user = $auth.currentUser
@@ -352,6 +412,8 @@ export default {
     }
 
     function cerrarSesion() {
+      // Limpiar la foto temporal al cerrar sesión
+      setTempPhoto('')
       signOut($auth).then(() => {
         window.location.href = '/login'
       })
@@ -382,7 +444,13 @@ export default {
       enviarVerificacionEmail,
       usuarioInicial,
       demoData,
-      toggleModo
+      toggleModo,
+      uploadingPhoto,
+      uploadError,
+      fileInput,
+      onFileChange,
+      triggerFileInput,
+      tempPhotoURL
     }
   },
 }
@@ -789,5 +857,45 @@ export default {
 .btn-modo-toggle-green:hover {
   background-color: #229954;
   color: #fff;
+}
+
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.avatar-large {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0.5rem;
+}
+
+.btn-photo-upload {
+  background-color: #1e4d92;
+  color: #fff;
+  margin-top: 0.3rem;
+  width: 100%;
+}
+
+.btn-photo-upload:hover {
+  background-color: #163a6f;
+  color: #fff;
+}
+
+.temp-photo-notice {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.temp-photo-notice small {
+  color: #e67e22;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dark-mode .temp-photo-notice small {
+  color: #f39c12;
 }
 </style>

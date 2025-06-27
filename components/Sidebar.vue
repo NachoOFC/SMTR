@@ -32,6 +32,11 @@
               <i class="bi bi-graph-up-arrow icon"></i> Gráficos
             </NuxtLink>
           </li>
+          <li>
+            <NuxtLink to="/mantenimientos" class="menu-link" active-class="active">
+              <i class="bi bi-wrench-adjustable-circle icon"></i> Mantenimientos
+            </NuxtLink>
+          </li>
           <li v-if="demoData.modo === 'tecnico'">
             <NuxtLink to="/solicitudes" class="menu-link" active-class="active">
               <i class="bi bi-inbox-fill icon"></i> Solicitudes

@@ -1,7 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 import { defineNuxtPlugin } from "#app";
 import { ref, readonly } from "vue";
+
+let db = null;
 
 export default defineNuxtPlugin((nuxtApp) => {
   // Variables reactivas para el estado de autenticación
@@ -27,6 +30,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       auth = getAuth(app);
+      db = getFirestore(app);
 
       // Configurar el listener de autenticación
       onAuthStateChanged(auth, (currentUser) => {
@@ -49,7 +53,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       auth: auth,
       user: readonly(user),
       isAuthenticated: readonly(isAuthenticated),
-      isAuthReady: readonly(isAuthReady)
+      isAuthReady: readonly(isAuthReady),
+      db
     }
   };
 });
+
+export { db };

@@ -113,8 +113,8 @@
               </div>
             </div>
 
-            <div v-if="error" class="error-message">
-              {{ error }}
+            <div v-if="formError" class="error-message">
+              {{ formError }}
             </div>
 
             <div v-if="mensaje" class="success-message">
@@ -122,7 +122,7 @@
             </div>
 
             <!-- Botón para verificar email si es necesario -->
-            <div v-if="error && error.includes('verificar')" class="verification-section">
+            <div v-if="formError && formError.includes('verificar')" class="verification-section">
               <p class="verification-text">
                 ¿No has recibido el email de verificación?
               </p>
@@ -152,7 +152,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { 
   signOut, 
   updateEmail, 
@@ -165,17 +165,19 @@ import {
 import { useNuxtApp } from '#app'
 import { demoData, toggleModo } from '~/store/demoData.js'
 import { useTempPhoto } from '~/composables/useTempPhoto.js'
+import { useNotifications } from '~/composables/useNotifications.js'
 
 export default {
   name: 'PerfilDropdownSimple',
   setup() {
-    const { $auth, $db } = useNuxtApp()
+    const { $auth, $db, $user, $isAuthenticated } = useNuxtApp()
     const { tempPhotoURL, setTempPhoto } = useTempPhoto()
+    const { success, error: showError, info } = useNotifications()
 
     const menuOpen = ref(false)
     const mostrarFormulario = ref(false)
     const guardando = ref(false)
-    const error = ref('')
+    const formError = ref('')
     const mensaje = ref('')
 
     const enviandoVerificacion = ref(false)
@@ -184,8 +186,8 @@ export default {
     const mostrarPasswordActual = ref(false)
 
     const usuario = ref({
-      nombre: '',
-      email: '',
+      nombre: 'Usuario Demo',
+      email: 'usuario@demo.com',
       photoURL: '',
     })
 
@@ -199,6 +201,39 @@ export default {
     const uploadingPhoto = ref(false)
     const uploadError = ref('')
     const fileInput = ref(null)
+
+    // Función para cargar datos del usuario
+    const cargarDatosUsuario = () => {
+      const user = $auth?.currentUser
+      if (user) {
+        // Extraer nombre del email (parte antes del @)
+        const email = user.email || 'usuario@demo.com'
+        const nombreDelEmail = email.split('@')[0]
+        const nombreCapitalizado = nombreDelEmail.charAt(0).toUpperCase() + nombreDelEmail.slice(1)
+        
+        usuario.value.nombre = user.displayName || nombreCapitalizado
+        usuario.value.email = email
+        usuario.value.photoURL = user.photoURL || ''
+        formulario.value.nuevoEmail = email
+      } else {
+        // Datos de ejemplo si no hay usuario autenticado
+        const email = 'usuario@demo.com'
+        const nombreDelEmail = email.split('@')[0]
+        const nombreCapitalizado = nombreDelEmail.charAt(0).toUpperCase() + nombreDelEmail.slice(1)
+        
+        usuario.value.nombre = nombreCapitalizado
+        usuario.value.email = email
+        usuario.value.photoURL = ''
+        formulario.value.nuevoEmail = email
+      }
+    }
+
+    // Watcher para el estado de autenticación
+    watch($isAuthenticated, (isAuth) => {
+      if (isAuth) {
+        cargarDatosUsuario()
+      }
+    }, { immediate: true })
 
     const onFileChange = async (e) => {
       uploadError.value = ''
@@ -223,6 +258,7 @@ export default {
           setTempPhoto(event.target.result)
           uploadingPhoto.value = false
           uploadError.value = ''
+          success('Foto de perfil actualizada correctamente')
         }
         
         reader.onerror = () => {
@@ -234,6 +270,7 @@ export default {
       } catch (err) {
         uploadError.value = err.message || 'Error al procesar la imagen'
         uploadingPhoto.value = false
+        showError(err.message || 'Error al procesar la imagen')
       }
     }
 
@@ -242,13 +279,7 @@ export default {
     }
 
     onMounted(() => {
-      const user = $auth.currentUser
-      if (user) {
-        usuario.value.nombre = user.displayName || ''
-        usuario.value.email = user.email || ''
-        usuario.value.photoURL = user.photoURL || ''
-        formulario.value.nuevoEmail = user.email || '' // Pre-llenar con el email actual
-      }
+      cargarDatosUsuario()
       document.addEventListener('click', onClickOutside)
     })
 
@@ -270,7 +301,7 @@ export default {
     function editarPerfil() {
       mostrarFormulario.value = true
       menuOpen.value = false
-      error.value = ''
+      formError.value = ''
       mensaje.value = ''
     }
 
@@ -278,13 +309,13 @@ export default {
       mostrarFormulario.value = false
       formulario.value.nuevaPassword = ''
       formulario.value.passwordActual = ''
-      error.value = ''
+      formError.value = ''
       mensaje.value = ''
     }
 
     async function enviarVerificacionEmail() {
       enviandoVerificacion.value = true
-      error.value = ''
+      formError.value = ''
       mensaje.value = ''
 
       try {
@@ -293,13 +324,14 @@ export default {
           throw new Error('Usuario no autenticado')
         }
 
-        // ← CAMBIO PRINCIPAL: Usar la función importada en lugar del método del user
         await sendEmailVerification(user)
         mensaje.value = 'Se ha enviado un email de verificación. Revisa tu bandeja de entrada y sigue las instrucciones.'
+        success('Email de verificación enviado correctamente')
         
       } catch (err) {
         console.error('Error al enviar verificación:', err)
-        error.value = 'Error al enviar el email de verificación: ' + err.message
+        formError.value = 'Error al enviar el email de verificación: ' + err.message
+        showError('Error al enviar el email de verificación')
       } finally {
         enviandoVerificacion.value = false
       }
@@ -307,7 +339,7 @@ export default {
 
     async function guardarCambios() {
       guardando.value = true
-      error.value = ''
+      formError.value = ''
       mensaje.value = ''
 
       try {
@@ -321,7 +353,7 @@ export default {
 
         // Verificar que la contraseña actual no esté vacía
         if (!formulario.value.passwordActual.trim()) {
-          error.value = 'La contraseña actual es requerida'
+          formError.value = 'La contraseña actual es requerida'
           return
         }
 
@@ -361,6 +393,7 @@ export default {
         }
 
         mensaje.value = 'Perfil actualizado correctamente'
+        success('Perfil actualizado correctamente')
         
         // Limpiar el formulario
         formulario.value.nuevaPassword = ''
@@ -380,31 +413,40 @@ export default {
         switch (err.code) {
           case 'auth/wrong-password':
           case 'auth/invalid-credential':
-            error.value = 'La contraseña actual es incorrecta. Verifica que sea la contraseña correcta.'
+            formError.value = 'La contraseña actual es incorrecta. Verifica que sea la contraseña correcta.'
+            showError('Contraseña actual incorrecta')
             break
           case 'auth/email-already-in-use':
-            error.value = 'Este email ya está en uso por otra cuenta'
+            formError.value = 'Este email ya está en uso por otra cuenta'
+            showError('Email ya está en uso')
             break
           case 'auth/invalid-email':
-            error.value = 'El formato del email no es válido'
+            formError.value = 'El formato del email no es válido'
+            showError('Formato de email inválido')
             break
           case 'auth/weak-password':
-            error.value = 'La nueva contraseña debe tener al menos 6 caracteres'
+            formError.value = 'La nueva contraseña debe tener al menos 6 caracteres'
+            showError('Contraseña muy débil')
             break
           case 'auth/requires-recent-login':
-            error.value = 'Por seguridad, debes cerrar sesión y volver a iniciar sesión antes de cambiar estos datos'
+            formError.value = 'Por seguridad, debes cerrar sesión y volver a iniciar sesión antes de cambiar estos datos'
+            showError('Requerida nueva autenticación')
             break
           case 'auth/user-not-found':
-            error.value = 'Usuario no encontrado. Inicia sesión nuevamente.'
+            formError.value = 'Usuario no encontrado. Inicia sesión nuevamente.'
+            showError('Usuario no encontrado')
             break
           case 'auth/too-many-requests':
-            error.value = 'Demasiados intentos fallidos. Espera unos minutos antes de intentar nuevamente.'
+            formError.value = 'Demasiados intentos fallidos. Espera unos minutos antes de intentar nuevamente.'
+            showError('Demasiados intentos fallidos')
             break
           case 'auth/operation-not-allowed':
-            error.value = 'Para cambiar el email, primero debes verificar tu email actual. Revisa tu bandeja de entrada.'
+            formError.value = 'Para cambiar el email, primero debes verificar tu email actual. Revisa tu bandeja de entrada.'
+            showError('Verificación de email requerida')
             break
           default:
-            error.value = `Error: ${err.message || 'Error desconocido al actualizar el perfil'}`
+            formError.value = `Error: ${err.message || 'Error desconocido al actualizar el perfil'}`
+            showError('Error al actualizar perfil')
         }
       } finally {
         guardando.value = false
@@ -414,9 +456,21 @@ export default {
     function cerrarSesion() {
       // Limpiar la foto temporal al cerrar sesión
       setTempPhoto('')
+      info('Cerrando sesión...')
       signOut($auth).then(() => {
+        success('Sesión cerrada correctamente')
+        window.location.href = '/login'
+      }).catch(() => {
+        showError('Error al cerrar sesión')
         window.location.href = '/login'
       })
+    }
+
+    function handleToggleModo() {
+      const modoAnterior = demoData.modo
+      toggleModo()
+      const nuevoModo = demoData.modo
+      success(`Modo cambiado de ${modoAnterior} a ${nuevoModo}`)
     }
 
     const usuarioInicial = computed(() => {
@@ -434,7 +488,7 @@ export default {
       usuario,
       formulario,
       guardando,
-      error,
+      formError,
       mensaje,
       toggleMenu,
       cerrarSesion,
@@ -444,7 +498,7 @@ export default {
       enviarVerificacionEmail,
       usuarioInicial,
       demoData,
-      toggleModo,
+      toggleModo: handleToggleModo,
       uploadingPhoto,
       uploadError,
       fileInput,

@@ -5,6 +5,8 @@
       <Topbar :darkMode="darkMode" @toggle-theme="toggleTheme" @update-search="updateSearch" />
       
       <div class="container-fluid px-md-4">
+        <!-- Cards de estadísticas eliminadas -->
+
         <div class="row mt-4" v-if="!selectedAssetId">
           <div class="col-12">
             <div class="filter-section">
@@ -117,6 +119,24 @@ export default {
       
       console.log('Filtered Assets:', assetsToFilter);
       return assetsToFilter;
+    },
+
+    criticalAssetsCount() {
+      return this.assets.filter(asset => 
+        asset.status && asset.status.toLowerCase().includes('critico')
+      ).length;
+    },
+
+    warningAssetsCount() {
+      return this.assets.filter(asset => 
+        asset.status && asset.status.toLowerCase().includes('precaucion')
+      ).length;
+    },
+
+    goodAssetsCount() {
+      return this.assets.filter(asset => 
+        asset.status && asset.status.toLowerCase().includes('bueno')
+      ).length;
     }
   },
 
@@ -208,17 +228,17 @@ export default {
 }
 
 .clear-filter {
-  background: #eee;
+  background-color: #6c757d;
+  color: white;
   border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 1.2rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease-in-out;
 }
 
 .clear-filter:hover {
-  background: #ddd;
+  background-color: #5a6268;
 }
 
 /* Estilos para modo oscuro */
@@ -228,8 +248,8 @@ export default {
 }
 
 .dark-mode .filter-section {
-  background: #1e1e1e;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  background: #272741;
+  color: #f0f0f0;
 }
 
 .dark-mode .filter-title {
@@ -271,4 +291,145 @@ export default {
 }
 
 /* Dark mode styles for search */
+
+/* Cards de estadísticas */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card-total {
+  --card-color: #3498db;
+  --card-color-light: #5dade2;
+}
+
+.stat-card-critical {
+  --card-color: #e74c3c;
+  --card-color-light: #ec7063;
+}
+
+.stat-card-warning {
+  --card-color: #f39c12;
+  --card-color-light: #f7dc6f;
+}
+
+.stat-card-good {
+  --card-color: #27ae60;
+  --card-color-light: #58d68d;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.stat-label {
+  margin: 0.25rem 0 0 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+}
+
+.stat-trend i {
+  font-size: 0.7rem;
+}
+
+/* Dark mode para cards */
+.dark-mode .stat-card {
+  background: #272741;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .stat-number {
+  color: #f0f0f0;
+}
+
+.dark-mode .stat-label {
+  color: #bdc3c7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+  }
+}
 </style> 

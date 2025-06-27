@@ -211,18 +211,69 @@ export default {
 .menu-link {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  font-size: 1.1rem;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #bdc3c7;
   text-decoration: none;
-  color: #fff;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  transition: background 0.2s;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
 }
 
-.menu-link:hover,
-.menu-link.active {
+.menu-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.menu-link:hover::before {
+  left: 100%;
+}
+
+.menu-link:hover {
+  color: #fff;
   background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-link.active {
+  color: #fff;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  transform: translateX(4px);
+}
+
+.menu-link.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: #fff;
+  border-radius: 2px 0 0 2px;
+}
+
+.icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.menu-link:hover .icon {
+  transform: scale(1.1);
+}
+
+.menu-link.active .icon {
+  transform: scale(1.1);
 }
 
 .sidebar-bottom {

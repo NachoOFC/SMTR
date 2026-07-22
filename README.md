@@ -1,68 +1,108 @@
-# Nuxt Minimal Starter
+# SMTR - Sistema de Monitoreo en Tiempo Real
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Sistema de monitoreo en tiempo real para activos eléctricos. Supervisa, gestiona y rastrea el estado y rendimiento de infraestructura eléctrica mediante sensores y dashboards interactivos.
 
-## Setup
+## Descripción
 
-Make sure to install dependencies:
+SMTR permite el monitoreo de componentes eléctricos como tableros de distribución, bancos de baterías UPS, motores de portón y lámparas. El sistema clasifica los activos en categorías de estado (Crítico, Precaución, Bueno) basándose en umbrales configurables de temperatura, consumo, vibración y otros parámetros.
+
+## Características principales
+
+- **Monitoreo en tiempo real** de activos eléctricos con clasificación de estado automática
+- **Dashboard interactivo** con gráficos de líneas, áreas, barras y radar
+- **Sistema de alertas** con acciones (generar reporte, marcar resuelto, notificar técnico)
+- **Gestión de mantenimiento** con sincronización en tiempo real (Firestore)
+- **Generación de reportes PDF** desde detalles de activos
+- **Autenticación** con Firebase Auth (email/password)
+- **Modo oscuro/claro** con persistencia en localStorage
+- **Diseño responsivo** con sidebar en desktop y navbar inferior en móvil
+- **Simulación de datos** con script en Python que envía datos a Firebase
+
+## Roles de usuario
+
+| Rol | Permisos |
+|-----|----------|
+| **Usuario** | Ver activos, alertas, gráficos, reportes, mantenimiento |
+| **Técnico** | Todo lo anterior + gestión de solicitudes de soporte |
+
+## Tecnologías
+
+| Capa | Tecnología |
+|------|------------|
+| Framework | Nuxt 3 (Vue 3) |
+| UI | Bootstrap 5 + Bootstrap Icons |
+| Gráficos | Chart.js + vue-chartjs |
+| Base de datos | Firebase Realtime Database + Firestore |
+| Autenticación | Firebase Auth |
+| PDF | jsPDF + html2pdf.js |
+| Simulación | Python (Firebase Admin SDK) |
+
+## Estructura del proyecto
+
+```
+SMTR/
+├── pages/                    # 11 rutas de páginas
+│   ├── login.vue             # Inicio de sesión
+│   ├── principal.vue         # Dashboard principal
+│   ├── graficos.vue          # Gráficos y análisis
+│   ├── alertas.vue           # Centro de alertas
+│   ├── historial.vue         # Historial de alertas
+│   ├── reportes.vue          # Gestión de reportes
+│   ├── mantenimientos.vue    # Registros de mantenimiento
+│   ├── solicitudes.vue       # Solicitudes (solo técnico)
+│   └── ayuda.vue             # Centro de ayuda
+├── components/               # 15 componentes reutilizables
+│   ├── Sidebar.vue           # Navegación lateral
+│   ├── Topbar.vue            # Barra superior
+│   ├── AlertList.vue         # Panel de alertas
+│   ├── AssetCard.vue         # Tarjeta de activo
+│   ├── StatusGraph.vue       # Gráfico de estado
+│   └── charts/               # Componentes de gráficos
+├── composables/              # Lógica reutilizable
+│   ├── useAssets.js          # Obtención de activos desde Firebase
+│   └── useTemperatureData.js # Motor de simulación de datos
+├── plugins/                  # Plugins de Nuxt
+│   ├── firebase.js           # Inicialización de Firebase
+│   └── auth.js               # Guard de autenticación
+├── middleware/
+│   └── auth.js               # Middleware de rutas protegidas
+├── store/
+│   └── demoData.js           # Almacenamiento reactivo con localStorage
+├── CodigoSimulacion/         # Simulador de datos en Python
+│   ├── SimuladorDatos.py     # Generador de datos de sensores
+│   └── test_simulator.py     # Tests unitarios
+└── public/                   # Assets estáticos (logo, APK, imágenes)
+```
+
+## Instalación
 
 ```bash
-# npm
-npm install
-
-# pnpm
+# Instalar dependencias
 pnpm install
 
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
+# Iniciar servidor de desarrollo
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+La aplicación estará disponible en `http://localhost:3000`.
 
-Build the application for production:
+## Simulación de datos
+
+El directorio `CodigoSimulacion/` contiene un script en Python que genera datos de sensores y los envía a Firebase cada 2 segundos.
 
 ```bash
-# npm
-npm run build
-
-# bun
-bun run build
+cd CodigoSimulacion
+pip install firebase-admin
+python SimuladorDatos.py
 ```
 
-Locally preview production build:
+## Build para producción
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
+pnpm build
 pnpm preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Licencia
 
-este proyecto usa boostrapmpara responsividad y js para conecciones a bd apk
+Proyecto académico - Universidad
